@@ -7,3 +7,10 @@ base de donnee:mysql
 
 compilation : 
  php -S localhost:8000 -t public 
+
+ 
+ ip  : 
+    - 172.16.7.131
+              .157
+              .97
+              .108
