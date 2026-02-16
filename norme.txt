@@ -3,3 +3,7 @@ base de donnee:mysql
 -Model(mettre les fonctions ici)
 -Controller(appelle les fonctions dans model)
 -View(affichage)
+
+
+compilation : 
+ php -S localhost:8000 -t public 
