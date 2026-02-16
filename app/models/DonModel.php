@@ -2,41 +2,52 @@
 
 class DonModel
 {
-    public static function create($typeBesoinId, $designation, $quantiteDonnee, $dateSaisie)
+    public static function create($donateurId, $typeBesoinId, $designation, $quantite, $montant)
     {
         $db = Flight::db();
-
-        $sql = 'INSERT INTO dons (type_besoin_id, designation, quantite_donnee, date_saisie, ordre_saisie)
-                VALUES (:type_besoin_id, :designation, :quantite_donnee, :date_saisie, :ordre_saisie)';
-
+        $sql = 'INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant)
+                VALUES (:donateur_id, :type_besoin_id, :designation, :quantite, :montant)';
         $stmt = $db->prepare($sql);
         $stmt->execute([
-            'type_besoin_id'  => $typeBesoinId,
-            'designation'     => $designation,
-            'quantite_donnee' => $quantiteDonnee,
-            'date_saisie'     => $dateSaisie,
-            // ordre_saisie simple : timestamp courant
-            'ordre_saisie'    => time(),
+            'donateur_id'    => $donateurId,
+            'type_besoin_id' => $typeBesoinId,
+            'designation'    => $designation,
+            'quantite'       => $quantite,
+            'montant'        => $montant,
         ]);
-
         return $db->lastInsertId();
     }
 
     public static function getAllWithType()
     {
         $db = Flight::db();
-
         $sql = 'SELECT d.id,
-                       t.libelle AS type,
+                       tb.libelle AS type,
                        d.designation,
-                       d.quantite_donnee,
-                       d.date_saisie
+                       d.quantite,
+                       d.montant,
+                       d.date_don,
+                       CONCAT(do2.prenom, " ", do2.nom) AS donateur
                 FROM dons d
-                JOIN types_besoin t ON d.type_besoin_id = t.id
-                ORDER BY d.date_saisie DESC, d.ordre_saisie DESC';
-
+                JOIN type_besoin tb ON d.type_besoin_id = tb.id
+                LEFT JOIN donateurs do2 ON d.donateur_id = do2.id
+                ORDER BY d.date_don DESC';
         $stmt = $db->query($sql);
+        return $stmt->fetchAll();
+    }
 
+    public static function getNonDispatched()
+    {
+        $db = Flight::db();
+        $sql = 'SELECT d.id, d.type_besoin_id, d.designation, d.quantite, d.montant, d.date_don,
+                       COALESCE(d.quantite, 0) - COALESCE(SUM(di.quantite_attribuee), 0) AS qte_restante,
+                       COALESCE(d.montant, 0) - COALESCE(SUM(di.montant_attribue), 0) AS mnt_restant
+                FROM dons d
+                LEFT JOIN dispatch di ON di.don_id = d.id
+                GROUP BY d.id
+                HAVING qte_restante > 0 OR mnt_restant > 0
+                ORDER BY d.date_don ASC, d.id ASC';
+        $stmt = $db->query($sql);
         return $stmt->fetchAll();
     }
 }

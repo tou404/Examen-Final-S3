@@ -4,8 +4,8 @@ class VilleController
 {
     public static function index()
     {
-        $regions = class_exists('RegionModel') ? RegionModel::getAll() : [];
-        $villes  = class_exists('VilleModel') ? VilleModel::getAllWithRegion() : [];
+        $regions = RegionModel::getAll();
+        $villes  = VilleModel::getAllWithRegion();
 
         Flight::render('ville.php', [
             'regions' => $regions,

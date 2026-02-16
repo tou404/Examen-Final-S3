@@ -35,6 +35,7 @@ Repartition des taches:
 -Toavina: initialisation du dossier "config" de notre base de donnee: database.php,config.php,routes.php,index.php 10 min
 -Itokiana: Creations des fichiers model 10 min
 
+
 Fonctionnement
     On saisie les besoins des sinistrés par ville (on n'identifie pas personnellement un sinistré). On saisie les dons On simule le dispatch des dons par ordre de date et de saisie
 
@@ -44,4 +45,3 @@ Fonctionnement
     Règle de gestion
     Chaque besoin possède un prix unitaire et un quantité. On suppose que le prix unitaire ne change jamais.
 
-    

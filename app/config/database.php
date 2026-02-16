@@ -5,7 +5,7 @@
  */
 
 return [
-    'host'    => 'localhost',
+    'host'    => '127.0.0.1',
     'dbname'  => 'db_s2_ETU003339',
     'user'    => 'root',
     'pass'    => '',

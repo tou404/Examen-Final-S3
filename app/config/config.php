@@ -26,3 +26,6 @@ Flight::register('db', 'PDO', [$dsn, $db_config['user'], $db_config['pass'], [
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES   => false,
 ]]);
+
+// Configurer le dossier des vues
+Flight::set('flight.views.path', __DIR__ . '/../views');
