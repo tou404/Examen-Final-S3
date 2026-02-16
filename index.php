@@ -14,3 +14,5 @@ require 'app/config/routes.php';
 
 // Démarrage de l'application
 Flight::start();
+
+?>
