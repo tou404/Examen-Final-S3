@@ -1,0 +1,33 @@
+1. Page d’accueil / Dashboard (dashboard.php)
+Affiche :
+Liste des villes
+Besoins totaux par ville
+Dons reçus
+Dons attribués
+Reste à couvrir
+
+
+2. Gestion des villes
+➜ ville.php
+Ajouter une ville
+Lister les villes
+
+
+3. Gestion des besoins
+➜ besoin.php
+Formulaire :
+Ville
+Type (nature / matériaux / argent)
+Désignation
+Prix unitaire
+Quantité
+
+
+4. Gestion des dons
+➜ don.php
+Formulaire :
+Type
+Désignation
+Quantité ou montant
+Date
+
