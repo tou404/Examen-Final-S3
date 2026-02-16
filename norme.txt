@@ -1,0 +1,5 @@
+Architecture PHP FLIGHT MVC
+base de donnee:mysql
+-Model(mettre les fonctions ici)
+-Controller(appelle les fonctions dans model)
+-View(affichage)
