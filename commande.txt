@@ -1,2 +1,1 @@
-cd Examen-Final-S3
-composer create-project flightphp/skeleton .
+composer require flightphp/core
