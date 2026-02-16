@@ -1,7 +1,7 @@
 Thème
 
 Le BNGRC souhaite créer une application de suivi des collectes et des distributions de dons pour les
-sinistrés.
+sinistrés
 
 Les sinistrés sont répartis par ville dans une région. Les sinitrés ont des besoins :
 en nature (riz, huile, ... )
@@ -10,14 +10,13 @@ en argent
 
 
 Fonctionnement
-    On saisie les besoins des sinistrés par ville (on n'identifie pas personnellement un sinistré). On saisie les
-    dons On simule le dispatch des dons par ordre de date et de saisie
-    Objectifs
-    Dans une page tableau de bord, on doit voir la liste des villes avec les besoins, et les dons attribués à
-    chaque ville.
+    On saisie les besoins des sinistrés par ville (on n'identifie pas personnellement un sinistré). On saisie les dons On simule le dispatch des dons par ordre de date et de saisie
 
-Règle de gestion
-Chaque besoin possède un prix unitaire et un quantité. On suppose que le prix unitaire ne change jamais.
+    Objectifs
+    Dans une page tableau de bord, on doit voir la liste des villes avec les besoins, et les dons attribués à chaque ville
+
+    Règle de gestion
+    Chaque besoin possède un prix unitaire et un quantité. On suppose que le prix unitaire ne change jamais.
 
 Notes
 A vous de créer toutes les pages nécéssaires au fonctionnement de l'application.
@@ -26,3 +25,11 @@ Design
 Todo List
 Code
 Livraison
+
+-Disposition des pages:
+
+
+
+Repartition des taches:
+-Marouane: creation de base de donnee mysql 10 min
+-Toavina: initialisation du dossier config: 
