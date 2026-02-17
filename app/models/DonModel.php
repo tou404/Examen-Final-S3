@@ -78,6 +78,10 @@ class DonModel
     public static function delete($id)
     {
         $db = Flight::db();
+        // Supprimer d'abord les dispatches liés à ce don
+        $stmt = $db->prepare('DELETE FROM dispatch WHERE don_id = :id');
+        $stmt->execute(['id' => $id]);
+        // Puis supprimer le don
         $stmt = $db->prepare('DELETE FROM dons WHERE id = :id');
         $stmt->execute(['id' => $id]);
     }
