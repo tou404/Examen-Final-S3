@@ -65,9 +65,8 @@ CREATE TABLE if not exists besoin (
 CREATE TABLE if not exists donateurs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
-    prenom VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    telephone VARCHAR(20)
+    prenom VARCHAR(255) NOT NULL
+  
 );
 
 -- ======================
