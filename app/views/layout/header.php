@@ -470,6 +470,9 @@
                 <a href="/achat" class="nav-link <?= $active === 'achat' ? 'active' : '' ?>">
                     <i class="fa-regular fa-credit-card"></i>Achats
                 </a>
+                <a href="/distribution" class="nav-link <?= $active === 'distribution' ? 'active' : '' ?>">
+                    <i class="fa-regular fa-hand-holding-heart"></i>Distribution
+                </a>
 
                 <p class="px-4 text-[9px] font-semibold text-blue-300/40 uppercase tracking-[0.12em] mt-5 mb-2">Rapports</p>
 
