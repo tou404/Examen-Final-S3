@@ -145,17 +145,45 @@ class DispatchModel
 
                 if ($mode === 'proportionnel') {
                     if ($don['type_besoin_id'] == 3) {
+                        // --- Proportionnel pour dons en ARGENT ---
                         $totalBesoin = array_sum(array_column($besoinsFiltres, 'montant_rest')) ?: 0;
                         if ($totalBesoin <= 0 || $mntDisponible <= 0) continue;
 
-                        foreach ($besoinsFiltres as $besoin) {
-                            if ($mntDisponible <= 0) break;
-                            $share = ($besoin['montant_rest'] ?? 0) / $totalBesoin;
-                            $mntAttribuer = floor($mntDisponible * $share);
-                            if ($mntAttribuer <= 0 && $mntDisponible > 0 && ($besoin['montant_rest'] ?? 0) > 0) {
-                                $mntAttribuer = 1;
+                        // Étape 1 : calculer la part exacte et arrondir au floor
+                        $attributions = [];
+                        $totalFloor = 0;
+                        foreach ($besoinsFiltres as $k => $besoin) {
+                            $exact = (($besoin['montant_rest'] ?? 0) / $totalBesoin) * $mntDisponible;
+                            $floored = floor($exact);
+                            $decimal = $exact - $floored;
+                            $attributions[$k] = [
+                                'besoin' => $besoin,
+                                'exact'  => $exact,
+                                'floor'  => $floored,
+                                'decimal' => $decimal,
+                            ];
+                            $totalFloor += $floored;
+                        }
+
+                        // Étape 2 : distribuer le reste aux plus grands restes décimaux
+                        $reste = $mntDisponible - $totalFloor;
+                        usort($attributions, function ($a, $b) {
+                            return $b['decimal'] <=> $a['decimal'];
+                        });
+                        foreach ($attributions as &$attr) {
+                            if ($reste <= 0) break;
+                            if ($attr['floor'] >= 0 && $attr['decimal'] > 0) {
+                                $attr['floor']++;
+                                $reste--;
                             }
+                        }
+                        unset($attr);
+
+                        // Étape 3 : enregistrer les attributions
+                        foreach ($attributions as $attr) {
+                            $mntAttribuer = $attr['floor'];
                             if ($mntAttribuer <= 0) continue;
+                            $besoin = $attr['besoin'];
 
                             $simulation[] = [
                                 'don_id'              => $don['id'],
@@ -167,30 +195,54 @@ class DispatchModel
                                 'quantite_attribuee'  => null,
                                 'montant_attribue'    => $mntAttribuer,
                             ];
-
-                            // mettre à jour les besoins locaux
                             foreach ($besoinsLocal as &$bref) {
                                 if ($bref['id'] == $besoin['id']) {
                                     $bref['montant_rest'] = ($bref['montant_rest'] ?? 0) - $mntAttribuer;
                                     break;
                                 }
                             }
-                            $mntDisponible -= $mntAttribuer;
+                            unset($bref);
                         }
                     } else {
-                        // distribuer proportionnellement la quantité disponible selon les besoins restants
+                        // --- Proportionnel pour dons en NATURE / MATÉRIAUX ---
                         $totalBesoin = array_sum(array_column($besoinsFiltres, 'quantite_restante')) ?: 0;
                         if ($totalBesoin <= 0) continue;
 
-                        foreach ($besoinsFiltres as $besoin) {
-                            if ($qteDisponible <= 0) break;
-                            $share = $besoin['quantite_restante'] / $totalBesoin;
-                            $qteAttribuer = floor($qteDisponible * $share);
-                            // s'assurer d'au moins 1 si possible et reste >0
-                            if ($qteAttribuer <= 0 && $qteDisponible > 0 && $besoin['quantite_restante'] > 0) {
-                                $qteAttribuer = 1;
+                        // Étape 1 : calculer la part exacte et arrondir au floor
+                        $attributions = [];
+                        $totalFloor = 0;
+                        foreach ($besoinsFiltres as $k => $besoin) {
+                            $exact = ($besoin['quantite_restante'] / $totalBesoin) * $qteDisponible;
+                            $floored = floor($exact);
+                            $decimal = $exact - $floored;
+                            $attributions[$k] = [
+                                'besoin' => $besoin,
+                                'exact'  => $exact,
+                                'floor'  => $floored,
+                                'decimal' => $decimal,
+                            ];
+                            $totalFloor += $floored;
+                        }
+
+                        // Étape 2 : distribuer le reste (1 par 1) aux plus grands restes décimaux
+                        $reste = $qteDisponible - $totalFloor;
+                        usort($attributions, function ($a, $b) {
+                            return $b['decimal'] <=> $a['decimal'];
+                        });
+                        foreach ($attributions as &$attr) {
+                            if ($reste <= 0) break;
+                            if ($attr['floor'] >= 0 && $attr['decimal'] > 0) {
+                                $attr['floor']++;
+                                $reste--;
                             }
+                        }
+                        unset($attr);
+
+                        // Étape 3 : enregistrer les attributions
+                        foreach ($attributions as $attr) {
+                            $qteAttribuer = $attr['floor'];
                             if ($qteAttribuer <= 0) continue;
+                            $besoin = $attr['besoin'];
 
                             $mntAttribuer = $qteAttribuer * (float) $besoin['prix_unitaire'];
 
@@ -204,15 +256,13 @@ class DispatchModel
                                 'quantite_attribuee'  => $qteAttribuer,
                                 'montant_attribue'    => $mntAttribuer,
                             ];
-
-                            // mettre à jour les besoins locaux
                             foreach ($besoinsLocal as &$bref) {
                                 if ($bref['id'] == $besoin['id']) {
                                     $bref['quantite_restante'] -= $qteAttribuer;
                                     break;
                                 }
                             }
-                            $qteDisponible -= $qteAttribuer;
+                            unset($bref);
                         }
                     }
 
@@ -339,47 +389,75 @@ class DispatchModel
             if ($mode === 'proportionnel') {
                 // gérer quantité ou montant selon le type
                 if ($don['type_besoin_id'] == 3) {
+                    // --- Proportionnel ARGENT ---
                     $totalBesoin = 0;
                     foreach ($besoinsFiltresIdx as $idx) $totalBesoin += ($besoins[$idx]['montant_rest'] ?? 0);
                     if ($totalBesoin <= 0 || $mntDisponible <= 0) continue;
 
+                    // Étape 1 : floor de chaque part
+                    $attributions = [];
+                    $totalFloor = 0;
                     foreach ($besoinsFiltresIdx as $idx) {
-                        if ($mntDisponible <= 0) break;
-                        $besoin = &$besoins[$idx];
-                        $share = ($besoin['montant_rest'] ?? 0) / $totalBesoin;
-                        $mntAttribuer = floor($mntDisponible * $share);
-                        if ($mntAttribuer <= 0 && $mntDisponible > 0 && ($besoin['montant_rest'] ?? 0) > 0) {
-                            $mntAttribuer = 1;
-                        }
-                        if ($mntAttribuer <= 0) continue;
+                        $exact = (($besoins[$idx]['montant_rest'] ?? 0) / $totalBesoin) * $mntDisponible;
+                        $floored = floor($exact);
+                        $decimal = $exact - $floored;
+                        $attributions[] = ['idx' => $idx, 'floor' => $floored, 'decimal' => $decimal];
+                        $totalFloor += $floored;
+                    }
 
+                    // Étape 2 : distribuer le reste aux restes décimaux les plus élevés
+                    $reste = $mntDisponible - $totalFloor;
+                    usort($attributions, function ($a, $b) { return $b['decimal'] <=> $a['decimal']; });
+                    foreach ($attributions as &$attr) {
+                        if ($reste <= 0) break;
+                        if ($attr['decimal'] > 0) { $attr['floor']++; $reste--; }
+                    }
+                    unset($attr);
+
+                    // Étape 3 : enregistrer
+                    foreach ($attributions as $attr) {
+                        $mntAttribuer = $attr['floor'];
+                        if ($mntAttribuer <= 0) continue;
+                        $besoin = &$besoins[$attr['idx']];
                         self::dispatch($don['id'], $besoin['id'], null, $mntAttribuer);
-                        // pas de mise à jour de quantite_restante pour ARG, dispatch suffit
                         $besoin['montant_rest'] -= $mntAttribuer;
-                        $mntDisponible -= $mntAttribuer;
                         $dispatches++;
                     }
                 } else {
+                    // --- Proportionnel NATURE / MATÉRIAUX ---
                     $totalBesoin = 0;
                     foreach ($besoinsFiltresIdx as $idx) $totalBesoin += $besoins[$idx]['quantite_restante'];
                     if ($totalBesoin <= 0) continue;
 
+                    // Étape 1 : floor de chaque part
+                    $attributions = [];
+                    $totalFloor = 0;
                     foreach ($besoinsFiltresIdx as $idx) {
-                        if ($qteDisponible <= 0) break;
-                        $besoin = &$besoins[$idx];
-                        $share = $besoin['quantite_restante'] / $totalBesoin;
-                        $qteAttribuer = floor($qteDisponible * $share);
-                        if ($qteAttribuer <= 0 && $qteDisponible > 0 && $besoin['quantite_restante'] > 0) {
-                            $qteAttribuer = 1;
-                        }
-                        if ($qteAttribuer <= 0) continue;
+                        $exact = ($besoins[$idx]['quantite_restante'] / $totalBesoin) * $qteDisponible;
+                        $floored = floor($exact);
+                        $decimal = $exact - $floored;
+                        $attributions[] = ['idx' => $idx, 'floor' => $floored, 'decimal' => $decimal];
+                        $totalFloor += $floored;
+                    }
 
+                    // Étape 2 : distribuer le reste aux restes décimaux les plus élevés
+                    $reste = $qteDisponible - $totalFloor;
+                    usort($attributions, function ($a, $b) { return $b['decimal'] <=> $a['decimal']; });
+                    foreach ($attributions as &$attr) {
+                        if ($reste <= 0) break;
+                        if ($attr['decimal'] > 0) { $attr['floor']++; $reste--; }
+                    }
+                    unset($attr);
+
+                    // Étape 3 : enregistrer
+                    foreach ($attributions as $attr) {
+                        $qteAttribuer = $attr['floor'];
+                        if ($qteAttribuer <= 0) continue;
+                        $besoin = &$besoins[$attr['idx']];
                         $mntAttribuer = $qteAttribuer * (float) $besoin['prix_unitaire'];
                         self::dispatch($don['id'], $besoin['id'], $qteAttribuer, $mntAttribuer);
                         BesoinModel::updateQuantiteRestante($besoin['id'], $besoin['quantite_restante'] - $qteAttribuer);
-
                         $besoin['quantite_restante'] -= $qteAttribuer;
-                        $qteDisponible -= $qteAttribuer;
                         $dispatches++;
                     }
                 }

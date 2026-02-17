@@ -47,9 +47,13 @@ Fonctionnement
 
 
 v3:
-Il y a un donnee qui dit Voici les besoins et les dons (a donner tout a leur)
+Il y a un donnee qui dit Voici les besoins et les dons 
 On demande donc :
 Simuler le dispatch et on cree un bouton qui renitialise tout ce qu'on a partage(On revient au donnee initiale)
-Mode 1:Par ordreVoici les besoins et les dons
-Mode 2:Ceux qui ont un minimum de besoin sont les premiers a servir
-Mode 3:Proportionnel au demande
+Il y a 3 modes de partage:
+Mode 1:Par ordre,les premiers qui ont demande sont les premiers a servir
+Mode 2:Par ordre croissant,ceux qui ont un minimum de besoin sont les premiers a servir
+Mode 3:Proportionnel au demande exemple: On doit distribuer 5 un pays demande 5 l'autre demande 3 et le dernier demande 1 donc le premier a 5/9 * 5=2.77 on arrondit a 2
+le deuxieme a 3/9*5=1.66 on arrondit a 1
+le troisieme a 1/9*5=0.55 on arrondit a 0
+Il reste 2 et on le donne au reste decimal le plus eleve on le donne a 0.77 donc le premier
