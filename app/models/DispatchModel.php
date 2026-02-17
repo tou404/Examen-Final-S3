@@ -101,7 +101,7 @@ class DispatchModel
         $join  = $withLabels
             ? 'JOIN villes v ON b.ville_id = v.id JOIN type_besoin tb ON b.type_besoin_id = tb.id'
             : '';
-        $sql = "SELECT b.id, b.type_besoin_id, b.prix_unitaire, b.quantite, b.quantite_restante, b.date_creation,
+        $sql = "SELECT b.id, b.type_besoin_id, b.prix_unitaire, b.quantite, b.quantite_restante, b.ordre, b.date_creation,
                        (b.quantite * b.prix_unitaire) AS montant_total_besoin,
                        COALESCE((SELECT SUM(di2.montant_attribue) FROM dispatch di2 WHERE di2.besoin_id = b.id), 0) AS montant_deja_attribue,
                        (b.quantite * b.prix_unitaire) - COALESCE((SELECT SUM(di2.montant_attribue) FROM dispatch di2 WHERE di2.besoin_id = b.id), 0) AS montant_rest
@@ -110,7 +110,7 @@ class DispatchModel
                 $join
                 WHERE b.quantite_restante > 0
                    OR (b.type_besoin_id = 3 AND (b.quantite * b.prix_unitaire) > COALESCE((SELECT SUM(di2.montant_attribue) FROM dispatch di2 WHERE di2.besoin_id = b.id), 0))
-                ORDER BY b.date_creation ASC, b.id ASC";
+                ORDER BY b.ordre ASC, b.id ASC";
         return $db->query($sql)->fetchAll();
     }
 
@@ -133,16 +133,16 @@ class DispatchModel
 
     /**
      * Trier les indices de besoins selon le mode choisi
-     * Mode 1 (ordre)    : par date_creation ASC → premiers demandeurs servis en premier
+     * Mode 1 (ordre)    : par ordre ASC → premiers demandeurs servis en premier
      * Mode 2 (min_need) : par quantité/montant croissant → les plus petits besoins d'abord
      * Mode 3 (proportionnel) : pas de tri spécial, le calcul proportionnel gère la distribution
      */
     private static function trierBesoinsParMode(&$besoinsFiltresIdx, &$besoins, $mode, $typeBesoinId)
     {
         if ($mode === 'ordre') {
-            // Mode 1 : par date de création (les premiers demandeurs sont servis en premier)
+            // Mode 1 : par ordre croissant (les premiers demandeurs sont servis en premier)
             usort($besoinsFiltresIdx, function ($a, $b) use ($besoins) {
-                $cmp = strcmp($besoins[$a]['date_creation'], $besoins[$b]['date_creation']);
+                $cmp = ($besoins[$a]['ordre'] ?? 0) <=> ($besoins[$b]['ordre'] ?? 0);
                 return $cmp !== 0 ? $cmp : ($besoins[$a]['id'] <=> $besoins[$b]['id']);
             });
         } elseif ($mode === 'min_need') {

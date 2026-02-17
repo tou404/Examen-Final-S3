@@ -135,6 +135,7 @@ $pct = $totalQte > 0 ? round((($totalQte - $totalRest) / $totalQte) * 100) : 0;
                     <thead>
                         <tr>
                             <th class="text-left">#</th>
+                            <th class="text-center">Ordre</th>
                             <th class="text-left">Ville</th>
                             <th class="text-left">Type</th>
                             <th class="text-left">Description</th>
@@ -146,7 +147,7 @@ $pct = $totalQte > 0 ? round((($totalQte - $totalRest) / $totalQte) * 100) : 0;
                     </thead>
                     <tbody>
                         <?php if (empty($besoins)): ?>
-                            <tr><td colspan="8" class="empty-state text-center">
+                            <tr><td colspan="9" class="empty-state text-center">
                                 <div class="empty-icon"><i class="fa-regular fa-clipboard text-gray-400 text-xl"></i></div>
                                 <p class="text-sm font-semibold text-gray-400">Aucun besoin enregistré</p>
                             </td></tr>
@@ -154,6 +155,7 @@ $pct = $totalQte > 0 ? round((($totalQte - $totalRest) / $totalQte) * 100) : 0;
                             <?php foreach ($besoins as $i => $b): ?>
                                 <tr>
                                     <td class="text-gray-400 font-medium text-xs"><?= $i + 1 ?></td>
+                                    <td class="text-center font-bold text-brand-600"><?= $b['ordre'] ?? '-' ?></td>
                                     <td class="font-semibold text-gray-900 dark:text-white text-sm"><?= htmlspecialchars($b['ville']) ?></td>
                                     <td><span class="badge bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"><?= htmlspecialchars($b['type']) ?></span></td>
                                     <td class="text-gray-600 dark:text-gray-300"><?= htmlspecialchars($b['description'] ?? '-') ?></td>
