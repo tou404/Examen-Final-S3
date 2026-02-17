@@ -76,7 +76,7 @@ class DispatchModel
      * Simuler le dispatch automatique des dons vers les besoins
      * SANS enregistrer - retourne une prévisualisation
      */
-    public static function simulerDispatchPreview()
+    public static function simulerDispatchPreview($mode = 'ordre')
     {
         $db = Flight::db();
 
@@ -93,15 +93,15 @@ class DispatchModel
                     ORDER BY d.date_don ASC, d.id ASC';
         $dons = $db->query($donsSql)->fetchAll();
 
-        // Récupérer les besoins non totalement couverts, par ordre chronologique
+         // Récupérer les besoins non totalement couverts
         $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.description, b.prix_unitaire, b.quantite_restante,
-                              v.nom AS ville, tb.libelle AS type_libelle
-                       FROM besoin b
-                       JOIN villes v ON b.ville_id = v.id
-                       JOIN type_besoin tb ON b.type_besoin_id = tb.id
-                       WHERE b.quantite_restante > 0
-                       ORDER BY b.date_creation ASC, b.id ASC';
-        $besoins = $db->query($besoinsSql)->fetchAll();
+                      v.nom AS ville, tb.libelle AS type_libelle,
+                      CASE WHEN b.type_besoin_id = 3 THEN (b.prix_unitaire - COALESCE((SELECT SUM(montant_attribue) FROM dispatch WHERE besoin_id = b.id),0)) ELSE NULL END AS montant_rest
+                  FROM besoin b
+                  JOIN villes v ON b.ville_id = v.id
+                  JOIN type_besoin tb ON b.type_besoin_id = tb.id
+                  WHERE (b.quantite_restante > 0 OR b.type_besoin_id = 3)';
+         $besoins = $db->query($besoinsSql)->fetchAll();
 
         $simulation = [];
 
@@ -110,32 +110,169 @@ class DispatchModel
 
         foreach ($dons as $don) {
             $qteDisponible = (float) $don['qte_restante'];
+            $mntDisponible = (float) $don['mnt_restant'];
 
-            foreach ($besoinsLocal as &$besoin) {
-                if ($besoin['quantite_restante'] <= 0) continue;
-                if ($don['type_besoin_id'] != $besoin['type_besoin_id']) continue;
+            // Filtrer besoins correspondant au type
+            $besoinsFiltres = array_values(array_filter($besoinsLocal, function ($b) use ($don) {
+                if ($b['type_besoin_id'] != $don['type_besoin_id']) return false;
+                if ($b['type_besoin_id'] == 3) {
+                    // besoin en argent
+                    return ($b['montant_rest'] ?? 0) > 0;
+                }
+                return $b['quantite_restante'] > 0;
+            }));
 
-                $qteAttribuer = min($qteDisponible, (float) $besoin['quantite_restante']);
-                if ($qteAttribuer <= 0) continue;
+            if (empty($besoinsFiltres)) continue;
 
-                $mntAttribuer = $qteAttribuer * (float) $besoin['prix_unitaire'];
-
-                $simulation[] = [
-                    'don_id'              => $don['id'],
-                    'don_designation'     => $don['designation'],
-                    'don_type'            => $don['type_libelle'],
-                    'besoin_id'           => $besoin['id'],
-                    'besoin_description'  => $besoin['description'],
-                    'ville'               => $besoin['ville'],
-                    'quantite_attribuee'  => $qteAttribuer,
-                    'montant_attribue'    => $mntAttribuer,
-                ];
-
-                $besoin['quantite_restante'] -= $qteAttribuer;
-                $qteDisponible -= $qteAttribuer;
-
-                if ($qteDisponible <= 0) break;
+            // Mode: ordre (par date) -> garder l'ordre naturel (id asc)
+            if ($mode === 'min_need') {
+                // trier par besoin le plus petit d'abord
+                usort($besoinsFiltres, function ($a, $b) {
+                    return $a['quantite_restante'] <=> $b['quantite_restante'];
+                });
+            } elseif ($mode === 'proportionnel') {
+                // pour proportionnel on calculera les parts ci-dessous
+                // garder la liste telle quelle
+            } else {
+                // 'ordre' ou autre -> trier par id (croissant)
+                usort($besoinsFiltres, function ($a, $b) {
+                    return $a['id'] <=> $b['id'];
+                });
             }
+
+                if ($mode === 'proportionnel') {
+                    if ($don['type_besoin_id'] == 3) {
+                        $totalBesoin = array_sum(array_column($besoinsFiltres, 'montant_rest')) ?: 0;
+                        if ($totalBesoin <= 0 || $mntDisponible <= 0) continue;
+
+                        foreach ($besoinsFiltres as $besoin) {
+                            if ($mntDisponible <= 0) break;
+                            $share = ($besoin['montant_rest'] ?? 0) / $totalBesoin;
+                            $mntAttribuer = floor($mntDisponible * $share);
+                            if ($mntAttribuer <= 0 && $mntDisponible > 0 && ($besoin['montant_rest'] ?? 0) > 0) {
+                                $mntAttribuer = 1;
+                            }
+                            if ($mntAttribuer <= 0) continue;
+
+                            $simulation[] = [
+                                'don_id'              => $don['id'],
+                                'don_designation'     => $don['designation'],
+                                'don_type'            => $don['type_libelle'],
+                                'besoin_id'           => $besoin['id'],
+                                'besoin_description'  => $besoin['description'],
+                                'ville'               => $besoin['ville'],
+                                'quantite_attribuee'  => null,
+                                'montant_attribue'    => $mntAttribuer,
+                            ];
+
+                            // mettre à jour les besoins locaux
+                            foreach ($besoinsLocal as &$bref) {
+                                if ($bref['id'] == $besoin['id']) {
+                                    $bref['montant_rest'] = ($bref['montant_rest'] ?? 0) - $mntAttribuer;
+                                    break;
+                                }
+                            }
+                            $mntDisponible -= $mntAttribuer;
+                        }
+                    } else {
+                        // distribuer proportionnellement la quantité disponible selon les besoins restants
+                        $totalBesoin = array_sum(array_column($besoinsFiltres, 'quantite_restante')) ?: 0;
+                        if ($totalBesoin <= 0) continue;
+
+                        foreach ($besoinsFiltres as $besoin) {
+                            if ($qteDisponible <= 0) break;
+                            $share = $besoin['quantite_restante'] / $totalBesoin;
+                            $qteAttribuer = floor($qteDisponible * $share);
+                            // s'assurer d'au moins 1 si possible et reste >0
+                            if ($qteAttribuer <= 0 && $qteDisponible > 0 && $besoin['quantite_restante'] > 0) {
+                                $qteAttribuer = 1;
+                            }
+                            if ($qteAttribuer <= 0) continue;
+
+                            $mntAttribuer = $qteAttribuer * (float) $besoin['prix_unitaire'];
+
+                            $simulation[] = [
+                                'don_id'              => $don['id'],
+                                'don_designation'     => $don['designation'],
+                                'don_type'            => $don['type_libelle'],
+                                'besoin_id'           => $besoin['id'],
+                                'besoin_description'  => $besoin['description'],
+                                'ville'               => $besoin['ville'],
+                                'quantite_attribuee'  => $qteAttribuer,
+                                'montant_attribue'    => $mntAttribuer,
+                            ];
+
+                            // mettre à jour les besoins locaux
+                            foreach ($besoinsLocal as &$bref) {
+                                if ($bref['id'] == $besoin['id']) {
+                                    $bref['quantite_restante'] -= $qteAttribuer;
+                                    break;
+                                }
+                            }
+                            $qteDisponible -= $qteAttribuer;
+                        }
+                    }
+
+                } else {
+                    // mode 'ordre' ou 'min_need' : attribuer séquentiellement
+                    foreach ($besoinsFiltres as $besoin) {
+                        if ($don['type_besoin_id'] == 3) {
+                            if ($mntDisponible <= 0) break;
+                            $need = $besoin['montant_rest'] ?? 0;
+                            if ($need <= 0) continue;
+                            $mntAttribuer = min($mntDisponible, $need);
+                            if ($mntAttribuer <= 0) continue;
+
+                            $simulation[] = [
+                                'don_id'              => $don['id'],
+                                'don_designation'     => $don['designation'],
+                                'don_type'            => $don['type_libelle'],
+                                'besoin_id'           => $besoin['id'],
+                                'besoin_description'  => $besoin['description'],
+                                'ville'               => $besoin['ville'],
+                                'quantite_attribuee'  => null,
+                                'montant_attribue'    => $mntAttribuer,
+                            ];
+
+                            foreach ($besoinsLocal as &$bref) {
+                                if ($bref['id'] == $besoin['id']) {
+                                    $bref['montant_rest'] = ($bref['montant_rest'] ?? 0) - $mntAttribuer;
+                                    break;
+                                }
+                            }
+                            $mntDisponible -= $mntAttribuer;
+                        } else {
+                            if ($qteDisponible <= 0) break;
+                            if ($besoin['quantite_restante'] <= 0) continue;
+
+                            $qteAttribuer = min($qteDisponible, (float) $besoin['quantite_restante']);
+                            if ($qteAttribuer <= 0) continue;
+
+                            $mntAttribuer = $qteAttribuer * (float) $besoin['prix_unitaire'];
+
+                            $simulation[] = [
+                                'don_id'              => $don['id'],
+                                'don_designation'     => $don['designation'],
+                                'don_type'            => $don['type_libelle'],
+                                'besoin_id'           => $besoin['id'],
+                                'besoin_description'  => $besoin['description'],
+                                'ville'               => $besoin['ville'],
+                                'quantite_attribuee'  => $qteAttribuer,
+                                'montant_attribue'    => $mntAttribuer,
+                            ];
+
+                            // mettre à jour les besoins locaux
+                            foreach ($besoinsLocal as &$bref) {
+                                if ($bref['id'] == $besoin['id']) {
+                                    $bref['quantite_restante'] -= $qteAttribuer;
+                                    break;
+                                }
+                            }
+
+                            $qteDisponible -= $qteAttribuer;
+                        }
+                    }
+                }
         }
 
         return $simulation;
@@ -144,7 +281,7 @@ class DispatchModel
     /**
      * Exécuter réellement le dispatch (enregistrer en base)
      */
-    public static function executerDispatch()
+    public static function executerDispatch($mode = 'ordre')
     {
         $db = Flight::db();
 
@@ -159,38 +296,135 @@ class DispatchModel
                     ORDER BY d.date_don ASC, d.id ASC';
         $dons = $db->query($donsSql)->fetchAll();
 
-        // Récupérer les besoins non totalement couverts, par ordre chronologique
-        $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.prix_unitaire, b.quantite_restante
-                       FROM besoin b
-                       WHERE b.quantite_restante > 0
-                       ORDER BY b.date_creation ASC, b.id ASC';
+        // Récupérer les besoins non totalement couverts (avec montant restant pour type ARG)
+        $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.prix_unitaire, b.quantite_restante,
+                       CASE WHEN b.type_besoin_id = 3 THEN (b.prix_unitaire - COALESCE((SELECT SUM(montant_attribue) FROM dispatch WHERE besoin_id = b.id),0)) ELSE NULL END AS montant_rest
+                   FROM besoin b
+                   WHERE (b.quantite_restante > 0 OR b.type_besoin_id = 3)';
         $besoins = $db->query($besoinsSql)->fetchAll();
 
         $dispatches = 0;
 
         foreach ($dons as $don) {
             $qteDisponible = (float) $don['qte_restante'];
+            $mntDisponible = (float) $don['mnt_restant'];
 
-            foreach ($besoins as &$besoin) {
-                if ($besoin['quantite_restante'] <= 0) continue;
-                if ($don['type_besoin_id'] != $besoin['type_besoin_id']) continue;
+            // Filtrer besoins correspondant au type
+            $besoinsFiltresIdx = [];
+            foreach ($besoins as $idx => $b) {
+                if ($b['type_besoin_id'] != $don['type_besoin_id']) continue;
+                if ($b['type_besoin_id'] == 3) {
+                    if (($b['montant_rest'] ?? 0) > 0) $besoinsFiltresIdx[] = $idx;
+                } else {
+                    if ($b['quantite_restante'] > 0) $besoinsFiltresIdx[] = $idx;
+                }
+            }
 
-                $qteAttribuer = min($qteDisponible, (float) $besoin['quantite_restante']);
-                if ($qteAttribuer <= 0) continue;
+            if (empty($besoinsFiltresIdx)) continue;
 
-                $mntAttribuer = $qteAttribuer * (float) $besoin['prix_unitaire'];
+            // Préparer ordre selon mode
+            if ($mode === 'min_need') {
+                usort($besoinsFiltresIdx, function ($a, $b) use ($besoins) {
+                    return $besoins[$a]['quantite_restante'] <=> $besoins[$b]['quantite_restante'];
+                });
+            } elseif ($mode === 'ordre') {
+                sort($besoinsFiltresIdx);
+            }
 
-                self::dispatch($don['id'], $besoin['id'], $qteAttribuer, $mntAttribuer);
-                BesoinModel::updateQuantiteRestante($besoin['id'], $besoin['quantite_restante'] - $qteAttribuer);
+            if ($mode === 'proportionnel') {
+                // gérer quantité ou montant selon le type
+                if ($don['type_besoin_id'] == 3) {
+                    $totalBesoin = 0;
+                    foreach ($besoinsFiltresIdx as $idx) $totalBesoin += ($besoins[$idx]['montant_rest'] ?? 0);
+                    if ($totalBesoin <= 0 || $mntDisponible <= 0) continue;
 
-                $besoin['quantite_restante'] -= $qteAttribuer;
-                $qteDisponible -= $qteAttribuer;
-                $dispatches++;
+                    foreach ($besoinsFiltresIdx as $idx) {
+                        if ($mntDisponible <= 0) break;
+                        $besoin = &$besoins[$idx];
+                        $share = ($besoin['montant_rest'] ?? 0) / $totalBesoin;
+                        $mntAttribuer = floor($mntDisponible * $share);
+                        if ($mntAttribuer <= 0 && $mntDisponible > 0 && ($besoin['montant_rest'] ?? 0) > 0) {
+                            $mntAttribuer = 1;
+                        }
+                        if ($mntAttribuer <= 0) continue;
 
-                if ($qteDisponible <= 0) break;
+                        self::dispatch($don['id'], $besoin['id'], null, $mntAttribuer);
+                        // pas de mise à jour de quantite_restante pour ARG, dispatch suffit
+                        $besoin['montant_rest'] -= $mntAttribuer;
+                        $mntDisponible -= $mntAttribuer;
+                        $dispatches++;
+                    }
+                } else {
+                    $totalBesoin = 0;
+                    foreach ($besoinsFiltresIdx as $idx) $totalBesoin += $besoins[$idx]['quantite_restante'];
+                    if ($totalBesoin <= 0) continue;
+
+                    foreach ($besoinsFiltresIdx as $idx) {
+                        if ($qteDisponible <= 0) break;
+                        $besoin = &$besoins[$idx];
+                        $share = $besoin['quantite_restante'] / $totalBesoin;
+                        $qteAttribuer = floor($qteDisponible * $share);
+                        if ($qteAttribuer <= 0 && $qteDisponible > 0 && $besoin['quantite_restante'] > 0) {
+                            $qteAttribuer = 1;
+                        }
+                        if ($qteAttribuer <= 0) continue;
+
+                        $mntAttribuer = $qteAttribuer * (float) $besoin['prix_unitaire'];
+                        self::dispatch($don['id'], $besoin['id'], $qteAttribuer, $mntAttribuer);
+                        BesoinModel::updateQuantiteRestante($besoin['id'], $besoin['quantite_restante'] - $qteAttribuer);
+
+                        $besoin['quantite_restante'] -= $qteAttribuer;
+                        $qteDisponible -= $qteAttribuer;
+                        $dispatches++;
+                    }
+                }
+
+            } else {
+                // ordre ou min_need: boucle séquentielle
+                foreach ($besoinsFiltresIdx as $idx) {
+                    if ($don['type_besoin_id'] == 3) {
+                        if ($mntDisponible <= 0) break;
+                        $besoin = &$besoins[$idx];
+                        $need = $besoin['montant_rest'] ?? 0;
+                        if ($need <= 0) continue;
+                        $mntAttribuer = min($mntDisponible, $need);
+                        if ($mntAttribuer <= 0) continue;
+
+                        self::dispatch($don['id'], $besoin['id'], null, $mntAttribuer);
+                        $besoin['montant_rest'] -= $mntAttribuer;
+                        $mntDisponible -= $mntAttribuer;
+                        $dispatches++;
+                    } else {
+                        if ($qteDisponible <= 0) break;
+                        $besoin = &$besoins[$idx];
+                        if ($besoin['quantite_restante'] <= 0) continue;
+
+                        $qteAttribuer = min($qteDisponible, (float) $besoin['quantite_restante']);
+                        if ($qteAttribuer <= 0) continue;
+
+                        $mntAttribuer = $qteAttribuer * (float) $besoin['prix_unitaire'];
+                        self::dispatch($don['id'], $besoin['id'], $qteAttribuer, $mntAttribuer);
+                        BesoinModel::updateQuantiteRestante($besoin['id'], $besoin['quantite_restante'] - $qteAttribuer);
+
+                        $besoin['quantite_restante'] -= $qteAttribuer;
+                        $qteDisponible -= $qteAttribuer;
+                        $dispatches++;
+                    }
+                }
             }
         }
 
         return $dispatches;
+    }
+
+    /**
+     * Réinitialiser tous les dispatches et remettre les besoins à leur quantité initiale
+     */
+    public static function resetDispatches()
+    {
+        $db = Flight::db();
+        $db->exec('DELETE FROM dispatch');
+        $db->exec('UPDATE besoin SET quantite_restante = quantite');
+        return true;
     }
 }

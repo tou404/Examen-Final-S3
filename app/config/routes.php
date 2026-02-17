@@ -49,6 +49,7 @@ Flight::route('GET /don/delete/@id', ['DonController', 'delete']);
 Flight::route('GET /dispatch', ['DispatchController', 'index']);
 Flight::route('GET /dispatch/simuler', ['DispatchController', 'simuler']);
 Flight::route('GET /dispatch/valider', ['DispatchController', 'valider']);
+Flight::route('GET /dispatch/reset', ['DispatchController', 'reset']);
 
 // ─── Achats ───
 Flight::route('GET /achat', ['AchatController', 'index']);

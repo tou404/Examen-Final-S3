@@ -25,12 +25,22 @@ include __DIR__ . '/layout/header.php';
                 <strong>Simulez</strong> pour voir le résultat, puis <strong>Validez</strong> pour confirmer.
             </p>
         </div>
-        <div class="flex gap-3">
-            <a href="/dispatch/simuler" class="btn bg-white hover:bg-gray-50 text-brand-800 text-sm py-2.5 px-5">
+        <div class="flex gap-3 items-center">
+            <label class="text-sm text-white mr-2">Mode :</label>
+            <select id="dispatch-mode" class="text-sm py-2 px-3 rounded">
+                <option value="ordre" <?= (!empty($mode) && $mode === 'ordre') ? 'selected' : '' ?>>1 - Par ordre (date)</option>
+                <option value="min_need" <?= (!empty($mode) && $mode === 'min_need') ? 'selected' : '' ?>>2 - Besoins petits d'abord</option>
+                <option value="proportionnel" <?= (!empty($mode) && $mode === 'proportionnel') ? 'selected' : '' ?>>3 - Proportionnel aux demandes</option>
+            </select>
+
+            <a id="btn-simuler" href="/dispatch/simuler?mode=<?= urlencode($mode ?? 'ordre') ?>" class="btn bg-white hover:bg-gray-50 text-brand-800 text-sm py-2.5 px-5">
                 <i class="fa-regular fa-eye mr-2"></i>Simuler
             </a>
-            <a href="/dispatch/valider" class="btn btn-success text-sm py-2.5 px-5">
+            <a id="btn-valider" href="/dispatch/valider?mode=<?= urlencode($mode ?? 'ordre') ?>" class="btn btn-success text-sm py-2.5 px-5">
                 <i class="fa-regular fa-circle-check mr-2"></i>Valider
+            </a>
+            <a id="btn-reset" href="/dispatch/reset" class="btn btn-danger text-sm py-2.5 px-5" onclick="return confirm('Confirmer la réinitialisation ? Cela supprimera tous les dispatches.')">
+                <i class="fa-regular fa-rotate-left mr-2"></i>Réinitialiser
             </a>
         </div>
     </div>
@@ -176,3 +186,20 @@ include __DIR__ . '/layout/header.php';
 </div>
 
 <?php include __DIR__ . '/layout/footer.php'; ?>
+
+<script>
+    (function(){
+        const sel = document.getElementById('dispatch-mode');
+        const btnSim = document.getElementById('btn-simuler');
+        const btnVal = document.getElementById('btn-valider');
+        function updateLinks(){
+            const m = encodeURIComponent(sel.value || 'ordre');
+            btnSim.href = '/dispatch/simuler?mode=' + m;
+            btnVal.href = '/dispatch/valider?mode=' + m;
+            const reset = document.getElementById('btn-reset');
+            if(reset) reset.href = '/dispatch/reset';
+        }
+        sel && sel.addEventListener('change', updateLinks);
+        updateLinks();
+    })();
+</script>
