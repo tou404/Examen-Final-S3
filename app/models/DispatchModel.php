@@ -93,7 +93,7 @@ class DispatchModel
                     ORDER BY qte_restante ASC, d.id ASC';
         $dons = $db->query($donsSql)->fetchAll();
 
-<<<<<<< HEAD
+
          // Récupérer les besoins non totalement couverts
         $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.description, b.prix_unitaire, b.quantite_restante,
                       v.nom AS ville, tb.libelle AS type_libelle,
@@ -103,7 +103,7 @@ class DispatchModel
                   JOIN type_besoin tb ON b.type_besoin_id = tb.id
                   WHERE (b.quantite_restante > 0 OR b.type_besoin_id = 3)';
          $besoins = $db->query($besoinsSql)->fetchAll();
-=======
+
         // Récupérer les besoins non totalement couverts, du plus petit au plus grand
         $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.description, b.prix_unitaire, b.quantite_restante,
                               v.nom AS ville, tb.libelle AS type_libelle
@@ -113,7 +113,7 @@ class DispatchModel
                        WHERE b.quantite_restante > 0
                        ORDER BY b.quantite_restante ASC, b.id ASC';
         $besoins = $db->query($besoinsSql)->fetchAll();
->>>>>>> 9f032549fc0da3296cd9eee7f40396da0ece7308
+
 
         $simulation = [];
 
@@ -308,20 +308,19 @@ class DispatchModel
                     ORDER BY qte_restante ASC, d.id ASC';
         $dons = $db->query($donsSql)->fetchAll();
 
-<<<<<<< HEAD
+
         // Récupérer les besoins non totalement couverts (avec montant restant pour type ARG)
         $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.prix_unitaire, b.quantite_restante,
                        CASE WHEN b.type_besoin_id = 3 THEN (b.prix_unitaire - COALESCE((SELECT SUM(montant_attribue) FROM dispatch WHERE besoin_id = b.id),0)) ELSE NULL END AS montant_rest
                    FROM besoin b
                    WHERE (b.quantite_restante > 0 OR b.type_besoin_id = 3)';
-=======
+
         // Récupérer les besoins non totalement couverts, du plus petit au plus grand
         $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.prix_unitaire, b.quantite_restante
                        FROM besoin b
                        WHERE b.quantite_restante > 0
                        ORDER BY b.quantite_restante ASC, b.id ASC';
->>>>>>> 9f032549fc0da3296cd9eee7f40396da0ece7308
-        $besoins = $db->query($besoinsSql)->fetchAll();
+       $besoins = $db->query($besoinsSql)->fetchAll();
 
         $dispatches = 0;
 
