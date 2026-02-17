@@ -2,11 +2,16 @@
 
 class BesoinModel
 {
-    public static function create($villeId, $typeBesoinId, $description, $prixUnitaire, $quantite)
+    public static function create($villeId, $typeBesoinId, $description, $prixUnitaire, $quantite, $ordre = null)
     {
         $db = Flight::db();
-        $sql = 'INSERT INTO besoin (ville_id, type_besoin_id, description, prix_unitaire, quantite, quantite_restante)
-                VALUES (:ville_id, :type_besoin_id, :description, :prix_unitaire, :quantite, :quantite_restante)';
+        // Si pas d'ordre fourni, prendre le max + 1
+        if ($ordre === null) {
+            $stmt = $db->query('SELECT COALESCE(MAX(ordre), 0) + 1 AS next_ordre FROM besoin');
+            $ordre = $stmt->fetch()['next_ordre'];
+        }
+        $sql = 'INSERT INTO besoin (ville_id, type_besoin_id, description, prix_unitaire, quantite, quantite_restante, ordre)
+                VALUES (:ville_id, :type_besoin_id, :description, :prix_unitaire, :quantite, :quantite_restante, :ordre)';
         $stmt = $db->prepare($sql);
         $stmt->execute([
             'ville_id'          => $villeId,
@@ -15,6 +20,7 @@ class BesoinModel
             'prix_unitaire'     => $prixUnitaire,
             'quantite'          => $quantite,
             'quantite_restante' => $quantite,
+            'ordre'             => $ordre,
         ]);
         return $db->lastInsertId();
     }
@@ -31,11 +37,12 @@ class BesoinModel
                        b.prix_unitaire,
                        b.quantite,
                        b.quantite_restante,
+                       b.ordre,
                        b.date_creation
                 FROM besoin b
                 JOIN villes v ON b.ville_id = v.id
                 JOIN type_besoin tb ON b.type_besoin_id = tb.id
-                ORDER BY b.date_creation DESC';
+                ORDER BY b.ordre ASC';
         $stmt = $db->query($sql);
         return $stmt->fetchAll();
     }
