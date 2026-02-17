@@ -25,6 +25,7 @@ class DispatchController
         if (!in_array($mode, $allowed)) $mode = 'ordre';
         $simulation = DispatchModel::simulerDispatchPreview($mode);
         $dispatches = DispatchModel::getAll();
+        $simulation = is_array($simulation) ? $simulation : [];
 
         Flight::render('dispatch.php', [
             'dispatches'  => $dispatches,
