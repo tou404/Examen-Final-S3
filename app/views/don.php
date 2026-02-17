@@ -36,37 +36,29 @@ include __DIR__ . '/layout/header.php';
             </button>
         </div>
         <div class="p-6">
-            <form method="post" action="/don" class="space-y-4">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Donateur -->
-                    <div class="space-y-4">
-                        <p class="text-[10px] font-bold text-brand-600 uppercase tracking-widest flex items-center pb-2 border-b border-gray-100 dark:border-gray-700">
-                            <i class="fa-regular fa-user mr-2"></i>Informations du donateur
-                        </p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Prénom <span class="text-red-400">*</span></label>
-                                <input type="text" name="prenom" required class="w-full input">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Nom <span class="text-red-400">*</span></label>
-                                <input type="text" name="nom" required class="w-full input">
-                            </div>
+            <form method="post" action="/don" class="space-y-5">
+                <!-- Ligne 1 : Donateur -->
+                <div>
+                    <p class="text-[10px] font-bold text-brand-600 uppercase tracking-widest flex items-center pb-2 mb-3 border-b border-gray-100 dark:border-gray-700">
+                        <i class="fa-regular fa-user mr-2"></i>Informations du donateur
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Prénom <span class="text-red-400">*</span></label>
+                            <input type="text" name="prenom" required class="w-full input">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Email <span class="text-red-400">*</span></label>
-                            <input type="email" name="email" required class="w-full input">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Téléphone</label>
-                            <input type="text" name="telephone" class="w-full input">
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Nom <span class="text-red-400">*</span></label>
+                            <input type="text" name="nom" required class="w-full input">
                         </div>
                     </div>
-                    <!-- Don -->
-                    <div class="space-y-4">
-                        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest flex items-center pb-2 border-b border-gray-100 dark:border-gray-700">
-                            <i class="fa-regular fa-gem mr-2"></i>Détails du don
-                        </p>
+                </div>
+                <!-- Ligne 2 : Don -->
+                <div>
+                    <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest flex items-center pb-2 mb-3 border-b border-gray-100 dark:border-gray-700">
+                        <i class="fa-regular fa-gem mr-2"></i>Détails du don
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Type <span class="text-red-400">*</span></label>
                             <select name="type_besoin_id" required class="w-full input">
@@ -80,15 +72,13 @@ include __DIR__ . '/layout/header.php';
                             <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Désignation</label>
                             <input type="text" name="designation" placeholder="Ex: Riz, Tentes..." class="w-full input">
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Quantité</label>
-                                <input type="number" min="0" name="quantite" value="0" class="w-full input">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Montant (Ar)</label>
-                                <input type="number" min="0" step="0.01" name="montant" value="0" class="w-full input">
-                            </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Quantité</label>
+                            <input type="number" min="0" name="quantite" value="0" class="w-full input">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Montant (Ar)</label>
+                            <input type="number" min="0" step="0.01" name="montant" value="0" class="w-full input">
                         </div>
                     </div>
                 </div>

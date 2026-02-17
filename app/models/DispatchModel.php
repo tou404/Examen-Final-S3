@@ -94,23 +94,14 @@ class DispatchModel
         $dons = $db->query($donsSql)->fetchAll();
 
 
-         // Récupérer les besoins non totalement couverts
+         // Récupérer les besoins non totalement couverts, du plus petit au plus grand
         $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.description, b.prix_unitaire, b.quantite_restante,
-                      v.nom AS ville, tb.libelle AS type_libelle,
-                      CASE WHEN b.type_besoin_id = 3 THEN (b.prix_unitaire - COALESCE((SELECT SUM(montant_attribue) FROM dispatch WHERE besoin_id = b.id),0)) ELSE NULL END AS montant_rest
-                  FROM besoin b
-                  JOIN villes v ON b.ville_id = v.id
-                  JOIN type_besoin tb ON b.type_besoin_id = tb.id
-                  WHERE (b.quantite_restante > 0 OR b.type_besoin_id = 3)';
-         $besoins = $db->query($besoinsSql)->fetchAll();
-
-        // Récupérer les besoins non totalement couverts, du plus petit au plus grand
-        $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.description, b.prix_unitaire, b.quantite_restante,
-                              v.nom AS ville, tb.libelle AS type_libelle
+                              v.nom AS ville, tb.libelle AS type_libelle,
+                              CASE WHEN b.type_besoin_id = 3 THEN (b.prix_unitaire - COALESCE((SELECT SUM(montant_attribue) FROM dispatch WHERE besoin_id = b.id),0)) ELSE NULL END AS montant_rest
                        FROM besoin b
                        JOIN villes v ON b.ville_id = v.id
                        JOIN type_besoin tb ON b.type_besoin_id = tb.id
-                       WHERE b.quantite_restante > 0
+                       WHERE (b.quantite_restante > 0 OR b.type_besoin_id = 3)
                        ORDER BY b.quantite_restante ASC, b.id ASC';
         $besoins = $db->query($besoinsSql)->fetchAll();
 
@@ -309,17 +300,12 @@ class DispatchModel
         $dons = $db->query($donsSql)->fetchAll();
 
 
-        // Récupérer les besoins non totalement couverts (avec montant restant pour type ARG)
+        // Récupérer les besoins non totalement couverts, du plus petit au plus grand
         $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.prix_unitaire, b.quantite_restante,
                        CASE WHEN b.type_besoin_id = 3 THEN (b.prix_unitaire - COALESCE((SELECT SUM(montant_attribue) FROM dispatch WHERE besoin_id = b.id),0)) ELSE NULL END AS montant_rest
                    FROM besoin b
-                   WHERE (b.quantite_restante > 0 OR b.type_besoin_id = 3)';
-
-        // Récupérer les besoins non totalement couverts, du plus petit au plus grand
-        $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.prix_unitaire, b.quantite_restante
-                       FROM besoin b
-                       WHERE b.quantite_restante > 0
-                       ORDER BY b.quantite_restante ASC, b.id ASC';
+                   WHERE (b.quantite_restante > 0 OR b.type_besoin_id = 3)
+                   ORDER BY b.quantite_restante ASC, b.id ASC';
        $besoins = $db->query($besoinsSql)->fetchAll();
 
         $dispatches = 0;

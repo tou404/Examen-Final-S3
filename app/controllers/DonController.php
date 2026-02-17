@@ -20,12 +20,10 @@ class DonController
         // Gérer le donateur (créer ou retrouver)
         $nom       = trim($data->nom);
         $prenom    = trim($data->prenom);
-        $email     = trim($data->email);
-        $telephone = trim($data->telephone ?? '');
 
-        $donateur = DonateurModel::findByEmail($email);
+        $donateur = DonateurModel::findByName($nom, $prenom);
         if (!$donateur) {
-            $donateurId = DonateurModel::create($nom, $prenom, $email, $telephone);
+            $donateurId = DonateurModel::create($nom, $prenom);
         } else {
             $donateurId = $donateur['id'];
         }
