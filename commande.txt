@@ -1,1 +1,2 @@
 composer require flightphp/core
+sudo /opt/lampp/bin/mysql -u ETU004311 -h 172.16.7.131 -p
