@@ -1,190 +1,191 @@
 -- =====================================
 -- DONNÉES DE TEST : BNGRC
+-- Suivi des collectes et distributions de dons pour les sinistrés
+-- Données conçues pour montrer la différence entre les 3 modes de dispatch
 -- Projet final S3 – Février 2026
 -- =====================================
 
 USE db_s2_ETU003339;
 
 -- ======================
--- CONFIGURATION
--- ======================
-INSERT INTO config (cle, valeur, description) VALUES 
-('frais_achat', '10', 'Pourcentage de frais d''achat sur les achats via dons en argent');
-
--- ======================
--- 1. REGIONS DE MADAGASCAR
+-- 1. REGIONS (id 1-4)
 -- ======================
 INSERT INTO region (nom) VALUES
-('Analamanga'),
-('Vakinankaratra'),
-('Itasy'),
-('Bongolava'),
-('Sofia'),
-('Boeny'),
-('Betsiboka'),
-('Melaky');
-
+('Analamanga'),       -- 1
+('Atsinanana'),       -- 2
+('Boeny'),            -- 3
+('Anosy');             -- 4
 
 -- ======================
--- 2. VILLES PRINCIPALES
+-- 2. VILLES (id 1-5)
 -- ======================
 INSERT INTO villes (nom, region_id) VALUES
--- Analamanga (1)
-('Antananarivo', 1),
-('Ankazobe', 1),
-('Anjozorobe', 1),
--- Vakinankaratra (2)
-('Antsirabe', 2),
-('Ambatolampy', 2),
-('Betafo', 2),
--- Sofia (5)
-('Antsohihy', 5),
-('Mandritsara', 5),
-('Bealanana', 5),
--- Boeny (6)
-('Mahajanga', 6),
-('Ambato-Boeni', 6),
-('Marovoay', 6),
--- Alaotra-Mangoro (9)
-('Ambatondrazaka', 9),
-('Moramanga', 9),
-('Andilamena', 9),
--- Atsinanana (10)
-('Toamasina', 10),
-('Brickaville', 10),
-('Vatomandry', 10),
--- Haute Matsiatra (13)
-('Fianarantsoa', 13),
-('Ambalavao', 13),
-('Ambohimahasoa', 13),
--- Atsimo-Andrefana (19)
-('Toliara', 19),
-('Sakaraha', 19),
-('Ankazoabo', 19);
-
+('Antananarivo', 1),   -- 1
+('Toamasina', 2),      -- 2
+('Mahajanga', 3),      -- 3
+('Taolagnaro', 4),     -- 4
+('Ambovombe', 4);      -- 5
 
 -- ======================
--- 3. TYPES DE BESOIN
+-- 3. TYPES DE BESOIN (id 1-3)
 -- ======================
 INSERT INTO type_besoin (code, libelle) VALUES
-('NAT', 'Nature (denrées alimentaires)'),
-('MAT', 'Matériels'),
-('ARG', 'Argent');
+('NAT', 'Nature'),       -- 1
+('MAT', 'Matériaux'),    -- 2
+('ARG', 'Argent');        -- 3
 
 -- ======================
--- 4. BESOINS PAR VILLE
+-- 4. BESOINS
 -- ======================
--- Ambovombe (id: 25) - Zone très touchée par la sécheresse
-INSERT INTO besoin (type_besoin_id, ville_id, description, prix_unitaire, quantite, quantite_restante, date_creation) VALUES
-(1, 25, 'Riz (sac de 50kg)', 95000.00, 500, 500, '2026-02-01 08:00:00'),
-(1, 25, 'Huile alimentaire (bidon 20L)', 85000.00, 200, 200, '2026-02-01 08:30:00'),
-(1, 25, 'Sucre (sac de 25kg)', 65000.00, 150, 150, '2026-02-01 09:00:00'),
-(2, 25, 'Tentes de secours', 250000.00, 100, 100, '2026-02-01 10:00:00'),
-(2, 25, 'Couvertures', 35000.00, 500, 500, '2026-02-01 10:30:00'),
-(3, 25, 'Fonds médicaux urgents', 1.00, 5000000, 5000000, '2026-02-01 11:00:00');
+-- *** NATURE (type 1) ***
+-- Besoins en riz : 3 villes demandent du riz avec des quantités et dates différentes
+-- Total demandé = 50 + 30 + 10 = 90, mais on va donner seulement 45
+-- → Mode ordre    : Tana(1er fev)=45, Toam=0, Mahaj=0 (1er servi, 1er comblé)
+-- → Mode min_need : Mahaj(10)=10, Toam(30)=30, Tana(5 restant)=5
+-- → Mode proportionnel : Tana=50/90*45=25, Toam=30/90*45=15, Mahaj=10/90*45=5
 
--- Beloha (id: 27) - Zone sinistrée
 INSERT INTO besoin (type_besoin_id, ville_id, description, prix_unitaire, quantite, quantite_restante, date_creation) VALUES
-(1, 27, 'Riz (sac de 50kg)', 95000.00, 300, 300, '2026-02-02 08:00:00'),
-(1, 27, 'Maïs (sac de 50kg)', 45000.00, 200, 200, '2026-02-02 08:30:00'),
-(2, 27, 'Bidons d''eau (20L)', 15000.00, 400, 400, '2026-02-02 09:00:00'),
-(2, 27, 'Ustensiles de cuisine', 25000.00, 150, 150, '2026-02-02 09:30:00'),
-(3, 27, 'Fonds reconstruction', 1.00, 3000000, 3000000, '2026-02-02 10:00:00');
+-- Antananarivo demande 50 riz en 1er (1er février)
+(1, 1, 'Riz (sac 25kg)', 50000.00, 50, 50, '2026-02-01 08:00:00'),
+-- Toamasina demande 30 riz en 2e (3 février)
+(1, 2, 'Riz (sac 25kg)', 50000.00, 30, 30, '2026-02-03 08:00:00'),
+-- Mahajanga demande 10 riz en 3e (5 février)
+(1, 3, 'Riz (sac 25kg)', 50000.00, 10, 10, '2026-02-05 08:00:00'),
 
--- Taolagnaro (id: 28) - Cyclone récent
-INSERT INTO besoin (type_besoin_id, ville_id, description, prix_unitaire, quantite, quantite_restante, date_creation) VALUES
-(1, 28, 'Riz (sac de 50kg)', 95000.00, 400, 400, '2026-02-03 08:00:00'),
-(1, 28, 'Conserves alimentaires', 8500.00, 1000, 1000, '2026-02-03 08:30:00'),
-(2, 28, 'Bâches de protection', 45000.00, 300, 300, '2026-02-03 09:00:00'),
-(2, 28, 'Tôles ondulées', 55000.00, 500, 500, '2026-02-03 09:30:00'),
-(2, 28, 'Clous (kg)', 12000.00, 200, 200, '2026-02-03 10:00:00'),
-(3, 28, 'Aide financière d''urgence', 1.00, 4000000, 4000000, '2026-02-03 10:30:00');
+-- Besoins huile : 2 villes
+(1, 1, 'Huile alimentaire (bidon 5L)', 25000.00, 20, 20, '2026-02-01 09:00:00'),
+(1, 4, 'Huile alimentaire (bidon 5L)', 25000.00, 15, 15, '2026-02-02 09:00:00'),
 
--- Toamasina (id: 16) - Inondations
-INSERT INTO besoin (type_besoin_id, ville_id, description, prix_unitaire, quantite, quantite_restante, date_creation) VALUES
-(1, 16, 'Eau potable (pack 6L)', 6000.00, 2000, 2000, '2026-02-04 08:00:00'),
-(1, 16, 'Riz (sac de 50kg)', 95000.00, 350, 350, '2026-02-04 08:30:00'),
-(2, 16, 'Médicaments de base', 150000.00, 100, 100, '2026-02-04 09:00:00'),
-(2, 16, 'Matelas gonflables', 75000.00, 200, 200, '2026-02-04 09:30:00'),
-(3, 16, 'Fonds pour relogement', 1.00, 6000000, 6000000, '2026-02-04 10:00:00');
+-- Besoin sucre : 1 ville
+(1, 5, 'Sucre (sac 10kg)', 30000.00, 25, 25, '2026-02-04 08:00:00');
 
--- Mahajanga (id: 10) - Cyclone
-INSERT INTO besoin (type_besoin_id, ville_id, description, prix_unitaire, quantite, quantite_restante, date_creation) VALUES
-(1, 10, 'Riz (sac de 50kg)', 95000.00, 250, 250, '2026-02-05 08:00:00'),
-(1, 10, 'Farine (sac de 25kg)', 42000.00, 150, 150, '2026-02-05 08:30:00'),
-(2, 10, 'Générateurs électriques', 850000.00, 20, 20, '2026-02-05 09:00:00'),
-(2, 10, 'Pompes à eau', 450000.00, 15, 15, '2026-02-05 09:30:00'),
-(3, 10, 'Reconstruction infrastructure', 1.00, 8000000, 8000000, '2026-02-05 10:00:00');
+-- *** MATÉRIAUX (type 2) ***
+-- Tôles : 3 villes, total demandé = 40+25+15 = 80, on donne 50
+-- → Mode ordre    : Toam(40)=40, Taol=10 restant, Ambov=0
+-- → Mode min_need : Ambov(15)=15, Taol(25)=25, Toam=10 restant
+-- → Mode proportionnel : Toam=40/80*50=25, Taol=25/80*50=15.6→16, Ambov=15/80*50=9.3→9
 
--- Antsirabe (id: 4) - Glissement de terrain
 INSERT INTO besoin (type_besoin_id, ville_id, description, prix_unitaire, quantite, quantite_restante, date_creation) VALUES
-(1, 4, 'Riz (sac de 50kg)', 95000.00, 200, 200, '2026-02-06 08:00:00'),
-(2, 4, 'Pelles et pioches', 35000.00, 100, 100, '2026-02-06 09:00:00'),
-(2, 4, 'Brouettes', 125000.00, 50, 50, '2026-02-06 09:30:00'),
-(3, 4, 'Aide aux familles déplacées', 1.00, 2000000, 2000000, '2026-02-06 10:00:00');
+-- Toamasina demande 40 tôles en 1er (2 février)
+(2, 2, 'Tôles ondulées', 55000.00, 40, 40, '2026-02-02 08:00:00'),
+-- Taolagnaro demande 25 tôles en 2e (4 février)
+(2, 4, 'Tôles ondulées', 55000.00, 25, 25, '2026-02-04 08:00:00'),
+-- Ambovombe demande 15 tôles en 3e (6 février)
+(2, 5, 'Tôles ondulées', 55000.00, 15, 15, '2026-02-06 08:00:00'),
 
--- Fianarantsoa (id: 19) - Tempête
+-- Clous : 2 villes
+(2, 3, 'Clous (kg)', 12000.00, 30, 30, '2026-02-03 09:00:00'),
+(2, 1, 'Clous (kg)', 12000.00, 20, 20, '2026-02-05 09:00:00'),
+
+-- Bâches : 1 ville
+(2, 2, 'Bâches de protection', 45000.00, 20, 20, '2026-02-01 10:00:00');
+
+-- *** ARGENT (type 3) ***
+-- 3 villes demandent de l'argent, total = 5M + 3M + 1M = 9M, on donne 5M
+-- Exactement l'exemple du todo ! 5/9*5M=2.77M, 3/9*5M=1.66M, 1/9*5M=0.55M
+-- → Mode ordre    : Tana(5M)=5M, Toam=0, Mahaj=0
+-- → Mode min_need : Mahaj(1M)=1M, Toam(3M)=3M, Tana=1M restant
+-- → Mode proportionnel : Tana=2 777 778, Toam=1 666 667, Mahaj=555 555
+
 INSERT INTO besoin (type_besoin_id, ville_id, description, prix_unitaire, quantite, quantite_restante, date_creation) VALUES
-(1, 19, 'Riz (sac de 50kg)', 95000.00, 180, 180, '2026-02-07 08:00:00'),
-(1, 19, 'Légumes secs (sac 10kg)', 28000.00, 200, 200, '2026-02-07 08:30:00'),
-(2, 19, 'Bâches plastiques', 45000.00, 150, 150, '2026-02-07 09:00:00'),
-(3, 19, 'Aide scolaire enfants', 1.00, 1500000, 1500000, '2026-02-07 09:30:00');
+-- Antananarivo demande 5M en 1er (1er février)
+(3, 1, 'Fonds médicaux urgents', 5000000.00, 1, 1, '2026-02-01 10:00:00'),
+-- Toamasina demande 3M en 2e (3 février)
+(3, 2, 'Fonds reconstruction', 3000000.00, 1, 1, '2026-02-03 10:00:00'),
+-- Mahajanga demande 1M en 3e (5 février)
+(3, 3, 'Aide familles déplacées', 1000000.00, 1, 1, '2026-02-05 10:00:00');
 
 -- ======================
--- 5. DONATEURS
+-- 5. DONATEURS (id 1-6)
 -- ======================
 INSERT INTO donateurs (nom, prenom, email, telephone) VALUES
 ('RAKOTO', 'Jean', 'jean.rakoto@gmail.com', '034 12 345 67'),
 ('RANDRIA', 'Marie', 'marie.randria@yahoo.fr', '033 23 456 78'),
 ('RASOA', 'Pierre', 'pierre.rasoa@outlook.com', '032 34 567 89'),
 ('RAHARISON', 'Claire', 'claire.raharison@gmail.com', '034 45 678 90'),
-('ANDRIA', 'Paul', 'paul.andria@gmail.com', '033 56 789 01'),
-('RABE', 'Sophie', 'sophie.rabe@yahoo.fr', '032 67 890 12'),
-('RAZAFY', 'Michel', 'michel.razafy@gmail.com', '034 78 901 23'),
-('RASOANAIVO', 'Anne', 'anne.rasoanaivo@outlook.com', '033 89 012 34'),
-('RAKOTOMANGA', 'Luc', 'luc.rakotomanga@gmail.com', '032 90 123 45'),
-('RANDRIAMANANA', 'Julie', 'julie.randriamanana@yahoo.fr', '034 01 234 56'),
-('RABEMANANJARA', 'Eric', 'eric.rabemananjara@gmail.com', '033 12 345 67'),
-('RAFANOMEZANA', 'Hery', 'hery.rafanomezana@outlook.com', '032 23 456 78'),
 ('CORPORATION TELMA', 'Service RSE', 'rse@telma.mg', '020 22 200 00'),
-('ONG AIDE MADAGASCAR', 'Coordination', 'contact@aidemadagascar.org', '020 22 300 00'),
-('JIRAMA SOLIDAIRE', 'Direction', 'solidaire@jirama.mg', '020 22 400 00');
+('ONG CARE', 'Coordination', 'contact@care.mg', '020 22 300 00');
 
 -- ======================
 -- 6. DONS
 -- ======================
--- Dons en nature (type_besoin_id = 1)
-INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant, date_don) VALUES
-(1, 1, 'Riz (sac de 50kg)', 50, NULL, '2026-02-05 10:00:00'),
-(2, 1, 'Huile alimentaire (bidon 20L)', 30, NULL, '2026-02-05 14:00:00'),
-(3, 1, 'Riz (sac de 50kg)', 25, NULL, '2026-02-06 09:00:00'),
-(4, 1, 'Conserves alimentaires', 200, NULL, '2026-02-06 11:00:00'),
-(5, 1, 'Sucre (sac de 25kg)', 40, NULL, '2026-02-07 08:00:00'),
-(6, 1, 'Maïs (sac de 50kg)', 60, NULL, '2026-02-07 10:00:00'),
-(13, 1, 'Riz (sac de 50kg)', 200, NULL, '2026-02-08 09:00:00'),
-(14, 1, 'Eau potable (pack 6L)', 500, NULL, '2026-02-08 14:00:00');
+-- Clé : les dons sont INSUFFISANTS pour couvrir tous les besoins
+-- C'est cette pénurie qui fait apparaître la différence entre les 3 modes
 
--- Dons en matériels (type_besoin_id = 2)
+-- DON NATURE : 45 sacs de riz (besoins total = 90) → pénurie !
 INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant, date_don) VALUES
-(7, 2, 'Tentes de secours', 20, NULL, '2026-02-06 15:00:00'),
-(8, 2, 'Couvertures', 100, NULL, '2026-02-07 09:00:00'),
-(9, 2, 'Bâches de protection', 50, NULL, '2026-02-07 14:00:00'),
-(10, 2, 'Bidons d''eau (20L)', 80, NULL, '2026-02-08 10:00:00'),
-(11, 2, 'Ustensiles de cuisine', 30, NULL, '2026-02-08 16:00:00'),
-(13, 2, 'Tôles ondulées', 150, NULL, '2026-02-09 09:00:00'),
-(14, 2, 'Médicaments de base', 25, NULL, '2026-02-09 11:00:00'),
-(15, 2, 'Générateurs électriques', 5, NULL, '2026-02-10 08:00:00');
+(1, 1, 'Riz (sac 25kg)', 45, NULL, '2026-02-10 08:00:00');
 
--- Dons en argent (type_besoin_id = 3)
+-- DON NATURE : 12 bidons d'huile (besoin total = 35) → pénurie !
 INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant, date_don) VALUES
-(1, 3, 'Contribution solidaire', NULL, 500000.00, '2026-02-05 12:00:00'),
-(2, 3, 'Don pour les sinistrés', NULL, 250000.00, '2026-02-06 10:00:00'),
-(4, 3, 'Aide d''urgence', NULL, 1000000.00, '2026-02-06 16:00:00'),
-(5, 3, 'Soutien aux familles', NULL, 350000.00, '2026-02-07 11:00:00'),
-(12, 3, 'Don humanitaire', NULL, 750000.00, '2026-02-08 09:00:00'),
-(13, 3, 'Fonds RSE TELMA', NULL, 10000000.00, '2026-02-08 10:00:00'),
-(14, 3, 'Aide ONG', NULL, 5000000.00, '2026-02-09 09:00:00'),
-(15, 3, 'Contribution JIRAMA', NULL, 3000000.00, '2026-02-10 09:00:00');
+(2, 1, 'Huile alimentaire (bidon 5L)', 12, NULL, '2026-02-10 10:00:00');
+
+-- DON NATURE : 25 sacs de sucre (besoin = 25) → juste assez
+INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant, date_don) VALUES
+(3, 1, 'Sucre (sac 10kg)', 25, NULL, '2026-02-10 12:00:00');
+
+-- DON MATÉRIAUX : 50 tôles (besoin total = 80) → pénurie !
+INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant, date_don) VALUES
+(4, 2, 'Tôles ondulées', 50, NULL, '2026-02-11 08:00:00');
+
+-- DON MATÉRIAUX : 30 kg clous (besoin total = 50) → pénurie !
+INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant, date_don) VALUES
+(5, 2, 'Clous (kg)', 30, NULL, '2026-02-11 10:00:00');
+
+-- DON MATÉRIAUX : 20 bâches (besoin = 20) → juste assez
+INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant, date_don) VALUES
+(6, 2, 'Bâches de protection', 20, NULL, '2026-02-11 12:00:00');
+
+-- DON ARGENT : 5 000 000 Ar (besoin total = 9M) → pénurie !
+-- Comme l'exemple du todo : distribuer 5M entre besoins de 5M, 3M, 1M
+INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant, date_don) VALUES
+(5, 3, 'Fonds RSE TELMA', NULL, 5000000.00, '2026-02-12 08:00:00');
+
+-- ======================
+-- PAS DE DISPATCH INITIALEMENT
+-- Le dispatch se fait via la simulation dans l'application
+-- On pourra voir clairement la différence entre les 3 modes :
+--
+-- ══════════════════════════════════════════════════════════════════════
+-- EXEMPLE : 45 sacs de riz → Tana(50), Toamasina(30), Mahajanga(10)
+-- ══════════════════════════════════════════════════════════════════════
+--
+-- MODE 1 (Par ordre de date) :
+--   Tana (1er fév) → reçoit 45 (ne couvre que 45/50)
+--   Toamasina     → reçoit 0
+--   Mahajanga     → reçoit 0
+--
+-- MODE 2 (Plus petits besoins d'abord) :
+--   Mahajanga (10) → reçoit 10
+--   Toamasina (30) → reçoit 30
+--   Tana      (50) → reçoit 5 (reste)
+--
+-- MODE 3 (Proportionnel) :
+--   Tana : 50/90 × 45 = 25.00 → 25
+--   Toam : 30/90 × 45 = 15.00 → 15
+--   Mahaj: 10/90 × 45 =  5.00 →  5
+--   Total = 45 ✓
+--
+-- ══════════════════════════════════════════════════════════════════════
+-- EXEMPLE : 5 000 000 Ar → Tana(5M), Toam(3M), Mahaj(1M)
+-- ══════════════════════════════════════════════════════════════════════
+--
+-- MODE 1 (Par ordre) :
+--   Tana (1er fév) → reçoit 5 000 000 (couvert)
+--   Toamasina      → reçoit 0
+--   Mahajanga      → reçoit 0
+--
+-- MODE 2 (Plus petits d'abord) :
+--   Mahajanga (1M) → reçoit 1 000 000
+--   Toamasina (3M) → reçoit 3 000 000
+--   Tana      (5M) → reçoit 1 000 000 (reste)
+--
+-- MODE 3 (Proportionnel) :
+--   Tana : 5/9 × 5M = 2 777 778
+--   Toam : 3/9 × 5M = 1 666 667
+--   Mahaj: 1/9 × 5M =   555 555
+--   Total = 5 000 000 ✓
+-- ======================
 
 -- ======================
 -- FIN DES DONNÉES
