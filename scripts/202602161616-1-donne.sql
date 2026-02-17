@@ -144,3 +144,4 @@ INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant, d
 (6, 3, 'Contribution solidaire', NULL, 200000.00, '2026-02-12 12:30:00'),
 (9, 3, 'Mécénat entreprise STAR', NULL, 3000000.00, '2026-02-13 10:00:00'),
 (8, 3, 'Fonds urgence Croix-Rouge', NULL, 4000000.00, '2026-02-14 08:00:00');
+
