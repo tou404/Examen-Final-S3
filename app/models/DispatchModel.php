@@ -90,17 +90,17 @@ class DispatchModel
                     LEFT JOIN dispatch di ON di.don_id = d.id
                     GROUP BY d.id
                     HAVING qte_restante > 0 OR mnt_restant > 0
-                    ORDER BY d.date_don ASC, d.id ASC';
+                    ORDER BY qte_restante ASC, d.id ASC';
         $dons = $db->query($donsSql)->fetchAll();
 
-        // Récupérer les besoins non totalement couverts, par ordre chronologique
+        // Récupérer les besoins non totalement couverts, du plus petit au plus grand
         $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.description, b.prix_unitaire, b.quantite_restante,
                               v.nom AS ville, tb.libelle AS type_libelle
                        FROM besoin b
                        JOIN villes v ON b.ville_id = v.id
                        JOIN type_besoin tb ON b.type_besoin_id = tb.id
                        WHERE b.quantite_restante > 0
-                       ORDER BY b.date_creation ASC, b.id ASC';
+                       ORDER BY b.quantite_restante ASC, b.id ASC';
         $besoins = $db->query($besoinsSql)->fetchAll();
 
         $simulation = [];
@@ -156,14 +156,14 @@ class DispatchModel
                     LEFT JOIN dispatch di ON di.don_id = d.id
                     GROUP BY d.id
                     HAVING qte_restante > 0 OR mnt_restant > 0
-                    ORDER BY d.date_don ASC, d.id ASC';
+                    ORDER BY qte_restante ASC, d.id ASC';
         $dons = $db->query($donsSql)->fetchAll();
 
-        // Récupérer les besoins non totalement couverts, par ordre chronologique
+        // Récupérer les besoins non totalement couverts, du plus petit au plus grand
         $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.prix_unitaire, b.quantite_restante
                        FROM besoin b
                        WHERE b.quantite_restante > 0
-                       ORDER BY b.date_creation ASC, b.id ASC';
+                       ORDER BY b.quantite_restante ASC, b.id ASC';
         $besoins = $db->query($besoinsSql)->fetchAll();
 
         $dispatches = 0;

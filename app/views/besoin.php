@@ -2,81 +2,134 @@
 $page_title = 'Gestion des besoins';
 $active = 'besoin';
 include __DIR__ . '/layout/header.php';
+
+$totalB = count($besoins);
+$totalQte = 0; $totalVal = 0; $totalRest = 0;
+foreach ($besoins as $b) {
+    $totalQte += intval($b['quantite']);
+    $totalVal += floatval($b['prix_unitaire']) * intval($b['quantite']);
+    $totalRest += intval($b['quantite_restante'] ?? 0);
+}
+$pct = $totalQte > 0 ? round((($totalQte - $totalRest) / $totalQte) * 100) : 0;
 ?>
 
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-    <!-- Formulaire -->
-    <div class="xl:col-span-1 animate-fade-in">
-        <div class="card">
-            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
-                        <i class="fa-regular fa-square-plus text-amber-600 text-sm"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Ajouter un besoin</h3>
-                        <p class="text-xs text-gray-400">Nouveau besoin pour une ville</p>
-                    </div>
-                </div>
+<!-- Mini stats -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="stat-card animate-fade-in">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Besoins</p>
+                <p class="text-xl font-extrabold text-gray-900 dark:text-white mt-0.5"><?= $totalB ?></p>
             </div>
-            <div class="p-6">
-                <form method="post" action="/besoin" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Ville <span class="text-red-400">*</span></label>
-                        <select name="ville_id" required class="w-full input">
-                            <option value="">-- Sélectionner --</option>
-                            <?php foreach ($villes as $v): ?>
-                                <option value="<?= $v['id'] ?>"><?= htmlspecialchars($v['ville']) ?> (<?= htmlspecialchars($v['region']) ?>)</option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Type <span class="text-red-400">*</span></label>
-                        <select name="type_besoin_id" required class="w-full input">
-                            <option value="">-- Sélectionner --</option>
-                            <?php foreach ($types as $t): ?>
-                                <option value="<?= $t['id'] ?>"><?= htmlspecialchars($t['libelle']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Description <span class="text-red-400">*</span></label>
-                        <input type="text" name="description" required placeholder="Ex: Sacs de riz 50kg" class="w-full input">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Prix unit. (Ar) <span class="text-red-400">*</span></label>
-                            <input type="number" step="0.01" min="0" name="prix_unitaire" required class="w-full input">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Quantité <span class="text-red-400">*</span></label>
-                            <input type="number" min="1" name="quantite" required class="w-full input">
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full btn btn-warning py-3 text-sm">
-                        <i class="fa-regular fa-floppy-disk mr-2"></i>Enregistrer
-                    </button>
-                </form>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <i class="fa-regular fa-clipboard text-white text-sm"></i>
             </div>
         </div>
     </div>
-
-    <!-- Liste -->
-    <div class="xl:col-span-2 animate-fade-in-delayed">
-        <div class="card overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
-                        <i class="fa-regular fa-clipboard text-amber-600 text-sm"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Liste des besoins</h3>
-                        <p class="text-xs text-gray-400">Tous les besoins enregistrés</p>
-                    </div>
-                </div>
-                <span class="badge bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"><?= count($besoins) ?> besoin(s)</span>
+    <div class="stat-card animate-fade-in" style="animation-delay:.05s">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Quantité</p>
+                <p class="text-xl font-extrabold text-gray-900 dark:text-white mt-0.5"><?= number_format($totalQte, 0, ',', ' ') ?></p>
             </div>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <i class="fa-regular fa-layer-group text-white text-sm"></i>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card animate-fade-in" style="animation-delay:.1s">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Valeur</p>
+                <p class="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5"><?= number_format($totalVal, 0, ',', ' ') ?></p>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <i class="fa-regular fa-money-bill-1 text-white text-sm"></i>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card animate-fade-in" style="animation-delay:.15s">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Couvert</p>
+                <p class="text-xl font-extrabold <?= $pct >= 75 ? 'text-emerald-600' : ($pct >= 40 ? 'text-amber-600' : 'text-red-500') ?> mt-0.5"><?= $pct ?>%</p>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br <?= $pct >= 75 ? 'from-emerald-400 to-green-500 shadow-emerald-500/20' : ($pct >= 40 ? 'from-amber-400 to-yellow-500 shadow-amber-500/20' : 'from-red-400 to-rose-500 shadow-red-500/20') ?> flex items-center justify-center shadow-lg">
+                <i class="fa-regular fa-chart-pie text-white text-sm"></i>
+            </div>
+        </div>
+        <div class="mt-2 progress-bar !h-1.5">
+            <div class="fill <?= $pct >= 75 ? 'fill-green' : ($pct >= 40 ? 'fill-amber' : 'fill-red') ?>" style="width:<?= min($pct, 100) ?>%"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bouton toggle formulaire -->
+<div class="mb-5 animate-fade-in" style="animation-delay:.2s">
+    <button onclick="document.getElementById('formBesoin').classList.toggle('hidden')" class="btn bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2.5 px-5 text-sm shadow-lg shadow-amber-500/25">
+        <i class="fa-regular fa-square-plus mr-2"></i>Nouveau besoin
+    </button>
+</div>
+
+<!-- Formulaire (masqué par défaut) -->
+<div id="formBesoin" class="hidden mb-6 animate-fade-in">
+    <div class="card border-t-4 !border-t-amber-500">
+        <div class="p-6">
+            <form method="post" action="/besoin" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Ville <span class="text-red-400">*</span></label>
+                    <select name="ville_id" required class="w-full input">
+                        <option value="">-- Sélectionner --</option>
+                        <?php foreach ($villes as $v): ?>
+                            <option value="<?= $v['id'] ?>"><?= htmlspecialchars($v['ville']) ?> (<?= htmlspecialchars($v['region']) ?>)</option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Type <span class="text-red-400">*</span></label>
+                    <select name="type_besoin_id" required class="w-full input">
+                        <option value="">-- Sélectionner --</option>
+                        <?php foreach ($types as $t): ?>
+                            <option value="<?= $t['id'] ?>"><?= htmlspecialchars($t['libelle']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Description <span class="text-red-400">*</span></label>
+                    <input type="text" name="description" required placeholder="Ex: Sacs de riz 50kg" class="w-full input">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Prix unit. (Ar) <span class="text-red-400">*</span></label>
+                    <input type="number" step="0.01" min="0" name="prix_unitaire" required class="w-full input">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Quantité <span class="text-red-400">*</span></label>
+                    <input type="number" min="1" name="quantite" required class="w-full input">
+                </div>
+                <div>
+                    <button type="submit" class="w-full btn bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white py-2.5 text-sm shadow-lg shadow-amber-500/25">
+                        <i class="fa-regular fa-floppy-disk mr-2"></i>Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des besoins -->
+<div class="card overflow-hidden animate-fade-in" style="animation-delay:.25s">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <i class="fa-regular fa-clipboard text-white text-sm"></i>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Liste des besoins</h3>
+                <p class="text-xs text-gray-400">Tous les besoins enregistrés</p>
+            </div>
+        </div>
+        <span class="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold shadow-sm"><?= count($besoins) ?> besoin(s)</span>
+    </div>
             <div class="overflow-x-auto">
                 <table class="w-full tbl">
                     <thead>
@@ -121,8 +174,6 @@ include __DIR__ . '/layout/header.php';
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
 </div>
 
 <?php include __DIR__ . '/layout/footer.php'; ?>

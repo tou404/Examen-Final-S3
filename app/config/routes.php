@@ -14,7 +14,6 @@ require_once __DIR__ . '/../models/DonModel.php';
 require_once __DIR__ . '/../models/DispatchModel.php';
 require_once __DIR__ . '/../models/ConfigModel.php';
 require_once __DIR__ . '/../models/AchatModel.php';
-require_once __DIR__ . '/../models/DistributionModel.php';
 
 // Inclusion des contrôleurs
 require_once __DIR__ . '/../controllers/DashboardController.php';
@@ -24,7 +23,6 @@ require_once __DIR__ . '/../controllers/DonController.php';
 require_once __DIR__ . '/../controllers/DispatchController.php';
 require_once __DIR__ . '/../controllers/AchatController.php';
 require_once __DIR__ . '/../controllers/RecapController.php';
-require_once __DIR__ . '/../controllers/DistributionController.php';
 
 // ─── Dashboard ───
 Flight::route('GET /', ['DashboardController', 'index']);
@@ -56,11 +54,6 @@ Flight::route('GET /dispatch/valider', ['DispatchController', 'valider']);
 Flight::route('GET /achat', ['AchatController', 'index']);
 Flight::route('POST /achat', ['AchatController', 'store']);
 Flight::route('POST /achat/frais', ['AchatController', 'updateFrais']);
-
-// ─── Distribution ───
-Flight::route('GET /distribution', ['DistributionController', 'index']);
-Flight::route('POST /distribution', ['DistributionController', 'store']);
-Flight::route('GET /distribution/delete/@id', ['DistributionController', 'delete']);
 
 // ─── Récapitulation ───
 Flight::route('GET /recap', ['RecapController', 'index']);
