@@ -24,4 +24,26 @@ class VilleController
 
         Flight::redirect('/ville');
     }
+
+    public static function update()
+    {
+        $data = Flight::request()->data;
+        $id       = (int) $data->id;
+        $regionId = (int) $data->region_id;
+        $nom      = trim($data->nom);
+
+        if ($id && $regionId && $nom !== '') {
+            VilleModel::update($id, $regionId, $nom);
+        }
+
+        Flight::redirect('/ville');
+    }
+
+    public static function delete($id)
+    {
+        if ($id) {
+            VilleModel::delete((int) $id);
+        }
+        Flight::redirect('/ville');
+    }
 }

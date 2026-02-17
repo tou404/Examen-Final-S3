@@ -4,169 +4,169 @@ $active = 'dispatch';
 include __DIR__ . '/layout/header.php';
 ?>
 
-<!-- Message de succès après simulation -->
+<!-- Message -->
 <?php if (!empty($message)): ?>
-    <div class="mb-6 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 text-green-800 flex items-center shadow-sm">
-        <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center mr-4 shadow-lg shadow-green-500/30">
-            <i class="fa-solid fa-circle-check text-lg"></i>
-        </div>
-        <div>
-            <p class="font-semibold">Simulation réussie !</p>
-            <p class="text-sm text-green-600"><?= htmlspecialchars($message) ?></p>
+    <div class="mb-6 animate-fade-in">
+        <div class="alert alert-info">
+            <i class="fa-regular fa-circle-check mr-3 text-brand-500"></i>
+            <?= htmlspecialchars($message) ?>
         </div>
     </div>
 <?php endif; ?>
 
 <!-- Section d'action -->
-<div class="mb-8 bg-gradient-to-r from-purple-500 via-purple-600 to-indigo-600 rounded-2xl shadow-xl shadow-purple-500/20 p-6">
+<div class="mb-6 card bg-brand-800 dark:bg-brand-950 p-6 animate-fade-in">
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div class="text-white">
-            <h2 class="text-xl font-bold mb-2 flex items-center">
-                <i class="fa-solid fa-truck-fast mr-3"></i>
-                Simulation de dispatch
+            <h2 class="text-lg font-bold mb-1 flex items-center">
+                <i class="fa-regular fa-paper-plane mr-3"></i>Distribution des dons
             </h2>
-            <p class="text-purple-100 text-sm max-w-xl">
-                <i class="fa-solid fa-circle-info mr-1"></i>
-                Le dispatch attribue automatiquement les dons aux besoins par ordre chronologique de saisie.
-                Les dons les plus anciens seront distribués en priorité.
+            <p class="text-blue-200/70 text-sm">
+                <strong>Simulez</strong> pour voir le résultat, puis <strong>Validez</strong> pour confirmer.
             </p>
         </div>
-        <a href="/dispatch/simuler"
-           class="inline-flex items-center px-6 py-3 bg-white hover:bg-gray-50 text-purple-700 text-sm font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 group">
-            <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center mr-3 group-hover:bg-purple-200 transition">
-                <i class="fa-solid fa-play text-purple-600"></i>
-            </div>
-            Lancer la simulation
-        </a>
-    </div>
-</div>
-
-<!-- Statistiques rapides -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total dispatches</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1"><?= count($dispatches ?? []) ?></p>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <i class="fa-solid fa-boxes-stacked text-white text-lg"></i>
-            </div>
-        </div>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Quantité distribuée</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">
-                    <?= array_sum(array_column($dispatches ?? [], 'quantite_attribuee')) ?>
-                </p>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <i class="fa-solid fa-cubes text-white text-lg"></i>
-            </div>
-        </div>
-    </div>
-    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Montant total</p>
-                <p class="text-2xl font-bold text-gray-800 mt-1">
-                    <?= number_format(array_sum(array_column($dispatches ?? [], 'montant_attribue')), 0, ',', ' ') ?> <span class="text-sm text-gray-500">Ar</span>
-                </p>
-            </div>
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/30">
-                <i class="fa-solid fa-coins text-white text-lg"></i>
-            </div>
+        <div class="flex gap-3">
+            <a href="/dispatch/simuler" class="btn bg-white hover:bg-gray-50 text-brand-800 text-sm py-2.5 px-5">
+                <i class="fa-regular fa-eye mr-2"></i>Simuler
+            </a>
+            <a href="/dispatch/valider" class="btn btn-success text-sm py-2.5 px-5">
+                <i class="fa-regular fa-circle-check mr-2"></i>Valider
+            </a>
         </div>
     </div>
 </div>
 
-<!-- Historique des dispatches -->
-<div class="bg-white rounded-2xl shadow-lg shadow-gray-200/50 overflow-hidden border border-gray-100">
-    <div class="px-6 py-5 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-100 flex items-center justify-between">
-        <h3 class="text-lg font-bold text-gray-800 flex items-center">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center mr-3 shadow-lg shadow-purple-500/30">
-                <i class="fa-solid fa-clock-rotate-left text-white"></i>
-            </div>
-            Historique des dispatches
+<!-- Simulation -->
+<?php if (!empty($simulation)): ?>
+<div class="mb-6 card overflow-hidden border-2 !border-amber-300 dark:!border-amber-600 animate-fade-in">
+    <div class="px-6 py-4 bg-amber-600 flex items-center justify-between">
+        <h3 class="font-bold text-white flex items-center text-sm">
+            <i class="fa-regular fa-eye mr-2"></i>Prévisualisation - <?= count($simulation) ?> attribution(s)
         </h3>
-        <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 ring-2 ring-purple-200">
-            <i class="fa-solid fa-list mr-1.5"></i>
-            <?= count($dispatches ?? []) ?> dispatch(s)
-        </span>
+        <span class="text-xs font-semibold px-3 py-1 rounded-md bg-white/20 text-white">Non enregistré</span>
+    </div>
+    <div class="p-3 bg-amber-50 dark:bg-amber-500/5 border-b border-amber-200 dark:border-amber-700">
+        <p class="text-xs text-amber-700 dark:text-amber-400 font-medium">
+            <i class="fa-regular fa-circle-exclamation mr-1"></i>Ces attributions ne sont pas encore enregistrées. Cliquez sur "Valider" pour confirmer.
+        </p>
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full">
+        <table class="w-full tbl">
             <thead>
-                <tr class="bg-gradient-to-r from-gray-50 to-gray-100 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    <th class="px-6 py-4">#</th>
-                    <th class="px-6 py-4">Don</th>
-                    <th class="px-6 py-4">Besoin</th>
-                    <th class="px-6 py-4">Ville</th>
-                    <th class="px-6 py-4 text-center">Qté attribuée</th>
-                    <th class="px-6 py-4 text-right">Montant</th>
-                    <th class="px-6 py-4">Date</th>
+                <tr>
+                    <th class="text-left !bg-amber-600">#</th>
+                    <th class="text-left !bg-amber-600">Don</th>
+                    <th class="text-left !bg-amber-600">Besoin</th>
+                    <th class="text-left !bg-amber-600">Ville</th>
+                    <th class="text-center !bg-amber-600">Qté</th>
+                    <th class="text-right !bg-amber-600">Montant</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
-                <?php if (empty($dispatches)): ?>
+            <tbody>
+                <?php foreach ($simulation as $i => $s): ?>
                     <tr>
-                        <td colspan="7" class="px-6 py-16 text-center">
-                            <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                                <i class="fa-solid fa-inbox text-gray-300 text-4xl"></i>
-                            </div>
-                            <p class="text-gray-500 font-medium">Aucun dispatch effectué</p>
-                            <p class="text-gray-400 text-sm mt-1">Cliquez sur "Lancer la simulation" pour commencer la distribution</p>
-                        </td>
+                        <td class="text-gray-400 font-medium text-xs"><?= $i + 1 ?></td>
+                        <td class="font-semibold text-gray-900 dark:text-white text-sm"><?= htmlspecialchars($s['don_designation']) ?></td>
+                        <td class="text-gray-600 dark:text-gray-300"><?= htmlspecialchars($s['besoin_description']) ?></td>
+                        <td><span class="badge bg-blue-50 dark:bg-blue-500/10 text-brand-600 dark:text-brand-400"><?= htmlspecialchars($s['ville']) ?></span></td>
+                        <td class="text-center"><span class="badge bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold"><?= $s['quantite_attribuee'] ?></span></td>
+                        <td class="text-right font-bold text-gray-900 dark:text-white"><?= number_format($s['montant_attribue'], 0, ',', ' ') ?> Ar</td>
                     </tr>
+                <?php endforeach; ?>
+            </tbody>
+            <tfoot>
+                <tr class="bg-amber-50 dark:bg-amber-500/5">
+                    <td colspan="4" class="text-right font-bold text-amber-700 dark:text-amber-400 text-sm !py-4">Total :</td>
+                    <td class="text-center font-bold text-amber-700 dark:text-amber-400"><?= array_sum(array_column($simulation, 'quantite_attribuee')) ?></td>
+                    <td class="text-right font-bold text-amber-700 dark:text-amber-400"><?= number_format(array_sum(array_column($simulation, 'montant_attribue')), 0, ',', ' ') ?> Ar</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+    <div class="stat-card animate-fade-in" style="animation-delay: 0.1s">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total dispatches</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1"><?= count($dispatches ?? []) ?></p>
+            </div>
+            <div class="w-11 h-11 rounded-lg bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center">
+                <i class="fa-regular fa-folder-open text-purple-600 text-lg"></i>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card animate-fade-in" style="animation-delay: 0.15s">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Qté distribuée</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1"><?= array_sum(array_column($dispatches ?? [], 'quantite_attribuee')) ?></p>
+            </div>
+            <div class="w-11 h-11 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
+                <i class="fa-regular fa-square-check text-brand-500 text-lg"></i>
+            </div>
+        </div>
+    </div>
+    <div class="stat-card animate-fade-in" style="animation-delay: 0.2s">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Montant total</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1"><?= number_format(array_sum(array_column($dispatches ?? [], 'montant_attribue')), 0, ',', ' ') ?> Ar</p>
+            </div>
+            <div class="w-11 h-11 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+                <i class="fa-regular fa-money-bill-1 text-emerald-600 text-lg"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historique -->
+<div class="card overflow-hidden animate-fade-in" style="animation-delay: 0.25s">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center">
+                <i class="fa-regular fa-clock text-purple-600 text-sm"></i>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Historique des dispatches</h3>
+                <p class="text-xs text-gray-400">Distributions validées</p>
+            </div>
+        </div>
+        <span class="badge bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400"><?= count($dispatches ?? []) ?> dispatch(s)</span>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full tbl">
+            <thead>
+                <tr>
+                    <th class="text-left">#</th>
+                    <th class="text-left">Don</th>
+                    <th class="text-left">Besoin</th>
+                    <th class="text-left">Ville</th>
+                    <th class="text-center">Qté</th>
+                    <th class="text-right">Montant</th>
+                    <th class="text-left">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($dispatches)): ?>
+                    <tr><td colspan="7" class="empty-state text-center">
+                        <div class="empty-icon"><i class="fa-regular fa-folder-open text-gray-400 text-xl"></i></div>
+                        <p class="text-sm font-semibold text-gray-400">Aucun dispatch effectué</p>
+                        <p class="text-xs text-gray-300 dark:text-gray-600 mt-1">Cliquez sur "Simuler" pour commencer</p>
+                    </td></tr>
                 <?php else: ?>
                     <?php foreach ($dispatches as $i => $di): ?>
-                        <tr class="hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-indigo-50/50 transition-all duration-200 group">
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 text-gray-600 text-sm font-bold group-hover:bg-purple-100 group-hover:text-purple-700 transition">
-                                    <?= $i + 1 ?>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mr-3 shadow-sm">
-                                        <i class="fa-solid fa-gift text-white text-sm"></i>
-                                    </div>
-                                    <span class="font-semibold text-gray-800"><?= htmlspecialchars($di['don_designation']) ?></span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mr-3 shadow-sm">
-                                        <i class="fa-solid fa-clipboard-list text-white text-sm"></i>
-                                    </div>
-                                    <span class="text-gray-700"><?= htmlspecialchars($di['besoin_description']) ?></span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 ring-1 ring-blue-200">
-                                    <i class="fa-solid fa-location-dot mr-1.5"></i>
-                                    <?= htmlspecialchars($di['ville']) ?>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="inline-flex items-center justify-center min-w-[60px] px-3 py-1.5 rounded-lg bg-purple-100 text-purple-700 font-bold text-sm">
-                                    <?= $di['quantite_attribuee'] ?>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <span class="font-bold text-gray-800"><?= number_format($di['montant_attribue'], 0, ',', ' ') ?></span>
-                                <span class="text-gray-500 text-sm ml-1">Ar</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center text-sm text-gray-500">
-                                    <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center mr-2">
-                                        <i class="fa-regular fa-calendar text-gray-400"></i>
-                                    </div>
-                                    <?= date('d/m/Y H:i', strtotime($di['date_dispatch'])) ?>
-                                </div>
-                            </td>
+                        <tr>
+                            <td class="text-gray-400 font-medium text-xs"><?= $i + 1 ?></td>
+                            <td class="font-semibold text-gray-900 dark:text-white text-sm"><?= htmlspecialchars($di['don_designation']) ?></td>
+                            <td class="text-gray-600 dark:text-gray-300"><?= htmlspecialchars($di['besoin_description']) ?></td>
+                            <td><span class="badge bg-blue-50 dark:bg-blue-500/10 text-brand-600 dark:text-brand-400"><?= htmlspecialchars($di['ville']) ?></span></td>
+                            <td class="text-center"><span class="badge bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold"><?= $di['quantite_attribuee'] ?></span></td>
+                            <td class="text-right font-bold text-gray-900 dark:text-white"><?= number_format($di['montant_attribue'], 0, ',', ' ') ?> Ar</td>
+                            <td class="text-gray-400 text-sm"><?= date('d/m/Y H:i', strtotime($di['date_dispatch'])) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

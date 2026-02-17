@@ -4,192 +4,273 @@ $active = 'don';
 include __DIR__ . '/layout/header.php';
 ?>
 
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-
-    <!-- Formulaire ajout don -->
-    <div class="xl:col-span-1">
-        <div class="bg-white rounded-2xl shadow-card overflow-hidden">
-            <div class="px-6 py-5 border-b border-slate-100 bg-gradient-to-r from-emerald-50 to-white">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                        <i class="fa-solid fa-gift text-white"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-base font-bold text-slate-800">Saisir un don</h3>
-                        <p class="text-xs text-slate-500">Nouveau don reçu</p>
-                    </div>
-                </div>
-            </div>
-            <div class="p-6">
-                <form method="post" action="/don" class="space-y-4">
-                    
-                    <!-- Section Donateur -->
-                    <div class="pb-4 border-b border-slate-100">
-                        <p class="text-[11px] uppercase tracking-widest text-slate-500 font-bold mb-4 flex items-center">
-                            <i class="fa-solid fa-user text-emerald-500 mr-2"></i> Donateur
-                        </p>
-                        <div class="grid grid-cols-2 gap-3 mb-3">
-                            <div>
-                                <label for="nom" class="block text-sm font-semibold text-slate-700 mb-1">Nom</label>
-                                <input type="text" name="nom" id="nom" required
-                                       class="w-full rounded-xl border-slate-200 border-2 px-4 py-2.5 text-sm focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all bg-slate-50 hover:bg-white">
-                            </div>
-                            <div>
-                                <label for="prenom" class="block text-sm font-semibold text-slate-700 mb-1">Prénom</label>
-                                <input type="text" name="prenom" id="prenom" required
-                                       class="w-full rounded-xl border-slate-200 border-2 px-4 py-2.5 text-sm focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all bg-slate-50 hover:bg-white">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="block text-sm font-semibold text-slate-700 mb-1">
-                                <i class="fa-solid fa-envelope text-emerald-500 mr-1"></i> Email
-                            </label>
-                            <input type="email" name="email" id="email" required
-                                   class="w-full rounded-xl border-slate-200 border-2 px-4 py-2.5 text-sm focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all bg-slate-50 hover:bg-white">
-                        </div>
-                        <div>
-                            <label for="telephone" class="block text-sm font-semibold text-slate-700 mb-1">
-                                <i class="fa-solid fa-phone text-emerald-500 mr-1"></i> Téléphone
-                            </label>
-                            <input type="text" name="telephone" id="telephone"
-                                   class="w-full rounded-xl border-slate-200 border-2 px-4 py-2.5 text-sm focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all bg-slate-50 hover:bg-white">
-                        </div>
-                    </div>
-
-                    <!-- Section Don -->
-                    <div class="pt-2">
-                        <p class="text-[11px] uppercase tracking-widest text-slate-500 font-bold mb-4 flex items-center">
-                            <i class="fa-solid fa-heart text-emerald-500 mr-2"></i> Détails du don
-                        </p>
-                        <div class="space-y-3">
-                            <div>
-                                <label for="type_besoin_id" class="block text-sm font-semibold text-slate-700 mb-1">
-                                    <i class="fa-solid fa-tags text-emerald-500 mr-1"></i> Type
-                                </label>
-                                <select name="type_besoin_id" id="type_besoin_id" required
-                                        class="w-full rounded-xl border-slate-200 border-2 px-4 py-2.5 text-sm focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all bg-slate-50 hover:bg-white">
-                                    <option value="">-- Sélectionner --</option>
-                                    <?php foreach ($types as $t): ?>
-                                        <option value="<?= $t['id'] ?>"><?= htmlspecialchars($t['libelle']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="designation" class="block text-sm font-semibold text-slate-700 mb-1">
-                                    <i class="fa-solid fa-align-left text-emerald-500 mr-1"></i> Désignation
-                                </label>
-                                <input type="text" name="designation" id="designation"
-                                       placeholder="Ex: Sac de riz 50kg"
-                                       class="w-full rounded-xl border-slate-200 border-2 px-4 py-2.5 text-sm focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all bg-slate-50 hover:bg-white">
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label for="quantite" class="block text-sm font-semibold text-slate-700 mb-1">
-                                        <i class="fa-solid fa-hashtag text-emerald-500 mr-1"></i> Quantité
-                                    </label>
-                                    <input type="number" min="0" name="quantite" id="quantite"
-                                           placeholder="0"
-                                           class="w-full rounded-xl border-slate-200 border-2 px-4 py-2.5 text-sm focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all bg-slate-50 hover:bg-white">
-                                </div>
-                                <div>
-                                    <label for="montant" class="block text-sm font-semibold text-slate-700 mb-1">
-                                        <i class="fa-solid fa-coins text-emerald-500 mr-1"></i> Montant
-                                    </label>
-                                    <input type="number" step="0.01" min="0" name="montant" id="montant"
-                                           placeholder="0"
-                                           class="w-full rounded-xl border-slate-200 border-2 px-4 py-2.5 text-sm focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all bg-slate-50 hover:bg-white">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit"
-                            class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 flex items-center justify-center mt-4">
-                        <i class="fa-solid fa-heart mr-2"></i>
-                        Enregistrer le don
-                    </button>
-                </form>
-            </div>
+<!-- Header + Toggle Button -->
+<div class="flex items-center justify-between mb-6 animate-fade-in">
+    <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+            <i class="fa-regular fa-heart text-emerald-600 text-lg"></i>
+        </div>
+        <div>
+            <h3 class="text-base font-bold text-gray-900 dark:text-white">Dons reçus</h3>
+            <p class="text-xs text-gray-400"><?= count($dons) ?> don(s) enregistré(s)</p>
         </div>
     </div>
+    <button onclick="toggleForm()" id="toggleFormBtn" class="btn btn-primary py-2.5 px-5 text-sm">
+        <i class="fa-regular fa-square-plus mr-2" id="toggleFormIcon"></i>
+        <span id="toggleFormText">Nouveau don</span>
+    </button>
+</div>
 
-    <!-- Liste des dons -->
-    <div class="xl:col-span-2">
-        <div class="bg-white rounded-2xl shadow-card overflow-hidden">
-            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
-                        <i class="fa-solid fa-list text-white"></i>
+<!-- Formulaire (caché par défaut) -->
+<div id="formSection" style="display:none;" class="mb-6 animate-fade-in">
+    <div class="card">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+                    <i class="fa-regular fa-pen-to-square text-emerald-600 text-sm"></i>
+                </div>
+                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Enregistrer un don</h3>
+            </div>
+            <button onclick="toggleForm()" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center text-gray-400 transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+        <div class="p-6">
+            <form method="post" action="/don" class="space-y-4">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Donateur -->
+                    <div class="space-y-4">
+                        <p class="text-[10px] font-bold text-brand-600 uppercase tracking-widest flex items-center pb-2 border-b border-gray-100 dark:border-gray-700">
+                            <i class="fa-regular fa-user mr-2"></i>Informations du donateur
+                        </p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Prénom <span class="text-red-400">*</span></label>
+                                <input type="text" name="prenom" required class="w-full input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Nom <span class="text-red-400">*</span></label>
+                                <input type="text" name="nom" required class="w-full input">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Email <span class="text-red-400">*</span></label>
+                            <input type="email" name="email" required class="w-full input">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Téléphone</label>
+                            <input type="text" name="telephone" class="w-full input">
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-base font-bold text-slate-800">Liste des dons</h3>
-                        <p class="text-xs text-slate-500">Tous les dons reçus</p>
+                    <!-- Don -->
+                    <div class="space-y-4">
+                        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest flex items-center pb-2 border-b border-gray-100 dark:border-gray-700">
+                            <i class="fa-regular fa-gem mr-2"></i>Détails du don
+                        </p>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Type <span class="text-red-400">*</span></label>
+                            <select name="type_besoin_id" required class="w-full input">
+                                <option value="">-- Sélectionner --</option>
+                                <?php foreach ($types as $t): ?>
+                                    <option value="<?= $t['id'] ?>"><?= htmlspecialchars($t['libelle']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Désignation</label>
+                            <input type="text" name="designation" placeholder="Ex: Riz, Tentes..." class="w-full input">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Quantité</label>
+                                <input type="number" min="0" name="quantite" value="0" class="w-full input">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Montant (Ar)</label>
+                                <input type="number" min="0" step="0.01" name="montant" value="0" class="w-full input">
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <span class="text-xs bg-gradient-to-r from-emerald-500 to-green-600 text-white px-3 py-1.5 rounded-full font-semibold shadow-lg shadow-emerald-500/30">
-                    <?= count($dons) ?> don(s)
-                </span>
+                <div class="pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-end">
+                    <button type="button" onclick="toggleForm()" class="btn btn-secondary py-2.5 px-5 text-sm mr-3">Annuler</button>
+                    <button type="submit" class="btn btn-success py-2.5 px-6 text-sm">
+                        <i class="fa-regular fa-floppy-disk mr-2"></i>Enregistrer le don
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Liste des dons -->
+<div class="animate-fade-in-delayed">
+    <?php if (empty($dons)): ?>
+        <div class="card p-12 text-center">
+            <div class="empty-icon mx-auto"><i class="fa-regular fa-heart text-gray-400 text-xl"></i></div>
+            <p class="text-sm font-semibold text-gray-400 mt-3">Aucun don enregistré</p>
+            <p class="text-xs text-gray-300 dark:text-gray-600 mt-1">Cliquez sur "Nouveau don" pour commencer</p>
+        </div>
+    <?php else: ?>
+        <div class="space-y-3">
+            <?php foreach ($dons as $i => $d): ?>
+                <?php
+                    $hasMontant = !empty($d['montant']) && $d['montant'] > 0;
+                    $hasQte = !empty($d['quantite']) && $d['quantite'] > 0;
+                    $nom = htmlspecialchars($d['donateur'] ?? 'Anonyme');
+                    $initiale = strtoupper(substr($nom, 0, 1));
+                ?>
+                <div class="card hover:shadow-md transition-all duration-200 group">
+                    <div class="p-4 flex items-center gap-4">
+                        <!-- Avatar -->
+                        <div class="w-11 h-11 rounded-full bg-brand-800 flex items-center justify-center flex-shrink-0">
+                            <span class="text-white text-sm font-bold"><?= $initiale ?></span>
+                        </div>
+
+                        <!-- Infos -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <p class="text-sm font-bold text-gray-900 dark:text-white truncate"><?= $nom ?></p>
+                                <span class="badge bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px]">
+                                    <?= htmlspecialchars($d['type']) ?>
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-3 mt-1">
+                                <?php if (!empty($d['designation'])): ?>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400"><?= htmlspecialchars($d['designation']) ?></span>
+                                    <span class="text-gray-300 dark:text-gray-600">&middot;</span>
+                                <?php endif; ?>
+                                <span class="text-[11px] text-gray-400 flex items-center">
+                                    <i class="fa-regular fa-calendar mr-1"></i><?= date('d/m/Y', strtotime($d['date_don'])) ?>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Valeurs -->
+                        <div class="flex items-center gap-3 flex-shrink-0">
+                            <?php if ($hasQte): ?>
+                                <div class="text-center px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/5">
+                                    <p class="text-sm font-bold text-brand-600 dark:text-brand-400"><?= $d['quantite'] ?></p>
+                                    <p class="text-[9px] text-gray-400 uppercase tracking-wider font-semibold">Qté</p>
+                                </div>
+                            <?php endif; ?>
+                            <?php if ($hasMontant): ?>
+                                <div class="text-center px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/5">
+                                    <p class="text-sm font-bold text-emerald-600 dark:text-emerald-400"><?= number_format($d['montant'], 0, ',', ' ') ?></p>
+                                    <p class="text-[9px] text-gray-400 uppercase tracking-wider font-semibold">Ariary</p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
+                            <button onclick="openEditDonModal(<?= $d['id'] ?>, '<?= htmlspecialchars($d['designation'] ?? '', ENT_QUOTES) ?>', <?= intval($d['quantite']) ?>, <?= floatval($d['montant']) ?>)"
+                                    class="act-btn act-btn-edit" title="Modifier"><i class="fa-regular fa-pen-to-square text-xs"></i></button>
+                            <button onclick="confirmDeleteDon(<?= $d['id'] ?>, '<?= htmlspecialchars($d['designation'] ?? 'ce don', ENT_QUOTES) ?>')"
+                                    class="act-btn act-btn-delete" title="Supprimer"><i class="fa-regular fa-trash-can text-xs"></i></button>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</div>
+
+<!-- Modal Edit -->
+<div id="editDonModal" class="fixed inset-0 modal-bg hidden items-center justify-center z-50">
+    <div class="modal-box bg-white dark:bg-[#1e293b] w-full max-w-md mx-4 overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 bg-emerald-600 flex items-center justify-between">
+            <h3 class="font-bold text-white flex items-center text-sm"><i class="fa-regular fa-pen-to-square mr-2"></i>Modifier le don</h3>
+            <button onclick="closeEditDonModal()" class="w-8 h-8 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+        </div>
+        <form method="POST" action="/don/update" class="p-6 space-y-4">
+            <input type="hidden" name="id" id="edit_don_id">
+            <input type="hidden" name="type_besoin_id" id="edit_don_type_id" value="3">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Désignation</label>
+                <input type="text" name="designation" id="edit_don_designation" class="w-full input">
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full table-pro">
-                    <thead>
-                        <tr class="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                            <th class="px-6 py-4">#</th>
-                            <th class="px-6 py-4">Donateur</th>
-                            <th class="px-6 py-4">Type</th>
-                            <th class="px-6 py-4">Désignation</th>
-                            <th class="px-6 py-4 text-right">Quantité</th>
-                            <th class="px-6 py-4 text-right">Montant</th>
-                            <th class="px-6 py-4">Date</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <?php if (empty($dons)): ?>
-                            <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center">
-                                        <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
-                                            <i class="fa-solid fa-gift text-slate-300 text-2xl"></i>
-                                        </div>
-                                        <p class="text-slate-500 font-medium">Aucun don enregistré</p>
-                                        <p class="text-slate-400 text-sm mt-1">Commencez par saisir un don</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($dons as $i => $d): ?>
-                                <tr class="hover:bg-slate-50/50 transition-colors">
-                                    <td class="px-6 py-4 text-sm text-slate-400 font-medium"><?= $i + 1 ?></td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center space-x-2">
-                                            <div class="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-500 rounded-lg flex items-center justify-center">
-                                                <i class="fa-solid fa-user text-white text-xs"></i>
-                                            </div>
-                                            <span class="text-sm font-semibold text-slate-800"><?= htmlspecialchars($d['donateur'] ?? 'Anonyme') ?></span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700">
-                                            <?= htmlspecialchars($d['type']) ?>
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-slate-600"><?= htmlspecialchars($d['designation'] ?? '-') ?></td>
-                                    <td class="px-6 py-4 text-sm text-right font-semibold text-slate-800"><?= $d['quantite'] ?? '-' ?></td>
-                                    <td class="px-6 py-4 text-sm text-right font-bold text-emerald-600">
-                                        <?= $d['montant'] ? number_format($d['montant'], 0, ',', ' ') . ' Ar' : '-' ?>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-slate-500">
-                                        <i class="fa-regular fa-calendar mr-1 text-slate-400"></i>
-                                        <?= isset($d['date_don']) ? date('d/m/Y', strtotime($d['date_don'])) : '-' ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Quantité</label>
+                    <input type="number" min="0" name="quantite" id="edit_don_quantite" class="w-full input">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">Montant (Ar)</label>
+                    <input type="number" min="0" step="0.01" name="montant" id="edit_don_montant" class="w-full input">
+                </div>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button type="button" onclick="closeEditDonModal()" class="flex-1 btn btn-secondary py-3 text-sm">Annuler</button>
+                <button type="submit" class="flex-1 btn btn-success py-3 text-sm"><i class="fa-regular fa-floppy-disk mr-2"></i>Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Delete -->
+<div id="deleteDonModal" class="fixed inset-0 modal-bg hidden items-center justify-center z-50">
+    <div class="modal-box bg-white dark:bg-[#1e293b] w-full max-w-sm mx-4 overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 bg-red-600 flex items-center justify-between">
+            <h3 class="font-bold text-white flex items-center text-sm"><i class="fa-regular fa-circle-exclamation mr-2"></i>Confirmer la suppression</h3>
+            <button onclick="closeDeleteDonModal()" class="w-8 h-8 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition"><i class="fa-solid fa-xmark text-sm"></i></button>
+        </div>
+        <div class="p-6 text-center">
+            <div class="w-14 h-14 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center mx-auto mb-4"><i class="fa-regular fa-trash-can text-red-500 text-xl"></i></div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Êtes-vous sûr de vouloir supprimer</p>
+            <p class="text-base font-bold text-gray-900 dark:text-white mt-1 mb-6" id="delete_don_name"></p>
+            <div class="flex space-x-3">
+                <button type="button" onclick="closeDeleteDonModal()" class="flex-1 btn btn-secondary py-3 text-sm">Annuler</button>
+                <a id="deleteDonLink" href="#" class="flex-1 btn btn-danger py-3 text-sm"><i class="fa-regular fa-trash-can mr-2"></i>Supprimer</a>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function toggleForm() {
+    var section = document.getElementById('formSection');
+    var btnText = document.getElementById('toggleFormText');
+    var btnIcon = document.getElementById('toggleFormIcon');
+    var btn = document.getElementById('toggleFormBtn');
+    if (section.style.display === 'none' || section.style.display === '') {
+        section.style.display = 'block';
+        btnText.textContent = 'Fermer';
+        btnIcon.className = 'fa-solid fa-xmark mr-2';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+    } else {
+        section.style.display = 'none';
+        btnText.textContent = 'Nouveau don';
+        btnIcon.className = 'fa-regular fa-square-plus mr-2';
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn-primary');
+    }
+}
+function openEditDonModal(id, designation, quantite, montant) {
+    document.getElementById('edit_don_id').value = id;
+    document.getElementById('edit_don_designation').value = designation;
+    document.getElementById('edit_don_quantite').value = quantite;
+    document.getElementById('edit_don_montant').value = montant;
+    document.getElementById('editDonModal').classList.remove('hidden');
+    document.getElementById('editDonModal').classList.add('flex');
+}
+function closeEditDonModal() {
+    document.getElementById('editDonModal').classList.add('hidden');
+    document.getElementById('editDonModal').classList.remove('flex');
+}
+function confirmDeleteDon(id, nom) {
+    document.getElementById('delete_don_name').textContent = nom + ' ?';
+    document.getElementById('deleteDonLink').href = '/don/delete/' + id;
+    document.getElementById('deleteDonModal').classList.remove('hidden');
+    document.getElementById('deleteDonModal').classList.add('flex');
+}
+function closeDeleteDonModal() {
+    document.getElementById('deleteDonModal').classList.add('hidden');
+    document.getElementById('deleteDonModal').classList.remove('flex');
+}
+document.getElementById('editDonModal').addEventListener('click', function(e) { if (e.target === this) closeEditDonModal(); });
+document.getElementById('deleteDonModal').addEventListener('click', function(e) { if (e.target === this) closeDeleteDonModal(); });
+</script>
 
 <?php include __DIR__ . '/layout/footer.php'; ?>

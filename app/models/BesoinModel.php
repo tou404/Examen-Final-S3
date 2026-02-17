@@ -23,6 +23,8 @@ class BesoinModel
     {
         $db = Flight::db();
         $sql = 'SELECT b.id,
+                       b.ville_id,
+                       b.type_besoin_id,
                        v.nom AS ville,
                        tb.libelle AS type,
                        b.description,
@@ -51,5 +53,35 @@ class BesoinModel
         $db = Flight::db();
         $stmt = $db->prepare('UPDATE besoin SET quantite_restante = :qr WHERE id = :id');
         $stmt->execute(['qr' => $quantiteRestante, 'id' => $id]);
+    }
+
+    public static function update($id, $villeId, $typeBesoinId, $description, $prixUnitaire, $quantite)
+    {
+        $db = Flight::db();
+        // Récupérer l'ancien besoin pour ajuster la quantité restante
+        $ancien = self::getById($id);
+        $diff = $quantite - $ancien['quantite'];
+        $nouvelleQteRestante = max(0, $ancien['quantite_restante'] + $diff);
+
+        $sql = 'UPDATE besoin SET ville_id = :ville_id, type_besoin_id = :type_besoin_id, 
+                description = :description, prix_unitaire = :prix_unitaire, 
+                quantite = :quantite, quantite_restante = :quantite_restante WHERE id = :id';
+        $stmt = $db->prepare($sql);
+        $stmt->execute([
+            'id'               => $id,
+            'ville_id'         => $villeId,
+            'type_besoin_id'   => $typeBesoinId,
+            'description'      => $description,
+            'prix_unitaire'    => $prixUnitaire,
+            'quantite'         => $quantite,
+            'quantite_restante'=> $nouvelleQteRestante,
+        ]);
+    }
+
+    public static function delete($id)
+    {
+        $db = Flight::db();
+        $stmt = $db->prepare('DELETE FROM besoin WHERE id = :id');
+        $stmt->execute(['id' => $id]);
     }
 }

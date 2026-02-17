@@ -74,9 +74,77 @@ class DispatchModel
 
     /**
      * Simuler le dispatch automatique des dons vers les besoins
-     * par ordre de date de saisie
+     * SANS enregistrer - retourne une prévisualisation
      */
-    public static function simulerDispatch()
+    public static function simulerDispatchPreview()
+    {
+        $db = Flight::db();
+
+        // Récupérer les dons non totalement dispatchés, par ordre chronologique
+        $donsSql = 'SELECT d.id, d.type_besoin_id, d.designation, d.quantite, d.montant,
+                           COALESCE(d.quantite, 0) - COALESCE(SUM(di.quantite_attribuee), 0) AS qte_restante,
+                           COALESCE(d.montant, 0) - COALESCE(SUM(di.montant_attribue), 0) AS mnt_restant,
+                           tb.libelle AS type_libelle
+                    FROM dons d
+                    JOIN type_besoin tb ON d.type_besoin_id = tb.id
+                    LEFT JOIN dispatch di ON di.don_id = d.id
+                    GROUP BY d.id
+                    HAVING qte_restante > 0 OR mnt_restant > 0
+                    ORDER BY d.date_don ASC, d.id ASC';
+        $dons = $db->query($donsSql)->fetchAll();
+
+        // Récupérer les besoins non totalement couverts, par ordre chronologique
+        $besoinsSql = 'SELECT b.id, b.type_besoin_id, b.description, b.prix_unitaire, b.quantite_restante,
+                              v.nom AS ville, tb.libelle AS type_libelle
+                       FROM besoin b
+                       JOIN villes v ON b.ville_id = v.id
+                       JOIN type_besoin tb ON b.type_besoin_id = tb.id
+                       WHERE b.quantite_restante > 0
+                       ORDER BY b.date_creation ASC, b.id ASC';
+        $besoins = $db->query($besoinsSql)->fetchAll();
+
+        $simulation = [];
+
+        // Copier pour ne pas modifier les originaux
+        $besoinsLocal = $besoins;
+
+        foreach ($dons as $don) {
+            $qteDisponible = (float) $don['qte_restante'];
+
+            foreach ($besoinsLocal as &$besoin) {
+                if ($besoin['quantite_restante'] <= 0) continue;
+                if ($don['type_besoin_id'] != $besoin['type_besoin_id']) continue;
+
+                $qteAttribuer = min($qteDisponible, (float) $besoin['quantite_restante']);
+                if ($qteAttribuer <= 0) continue;
+
+                $mntAttribuer = $qteAttribuer * (float) $besoin['prix_unitaire'];
+
+                $simulation[] = [
+                    'don_id'              => $don['id'],
+                    'don_designation'     => $don['designation'],
+                    'don_type'            => $don['type_libelle'],
+                    'besoin_id'           => $besoin['id'],
+                    'besoin_description'  => $besoin['description'],
+                    'ville'               => $besoin['ville'],
+                    'quantite_attribuee'  => $qteAttribuer,
+                    'montant_attribue'    => $mntAttribuer,
+                ];
+
+                $besoin['quantite_restante'] -= $qteAttribuer;
+                $qteDisponible -= $qteAttribuer;
+
+                if ($qteDisponible <= 0) break;
+            }
+        }
+
+        return $simulation;
+    }
+
+    /**
+     * Exécuter réellement le dispatch (enregistrer en base)
+     */
+    public static function executerDispatch()
     {
         $db = Flight::db();
 
