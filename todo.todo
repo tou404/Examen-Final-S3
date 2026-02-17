@@ -51,7 +51,7 @@ Il y a un donnee qui dit Voici les besoins et les dons
 On demande donc :
 Simuler le dispatch et on cree un bouton qui renitialise tout ce qu'on a partage(On revient au donnee initiale)
 Il y a 3 modes de partage:
-Mode 1:Par ordre,les premiers qui ont demande sont les premiers a servir
+Mode 1:Par ordre,les premiers qui ont demande sont les premiers a profiter des dons
 Mode 2:Par ordre croissant,ceux qui ont un minimum de besoin sont les premiers a servir
 Mode 3:Proportionnel au demande exemple: On doit distribuer 5 un pays demande 5 l'autre demande 3 et le dernier demande 1 donc le premier a 5/9 * 5=2.77 on arrondit a 2
 le deuxieme a 3/9*5=1.66 on arrondit a 1

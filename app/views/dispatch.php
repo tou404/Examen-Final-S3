@@ -56,10 +56,11 @@ include __DIR__ . '/layout/header.php';
         <span class="text-xs font-semibold px-3 py-1 rounded-md bg-white/20 text-white">Non enregistré</span>
     </div>
     <div class="p-3 bg-amber-50 dark:bg-amber-500/5 border-b border-amber-200 dark:border-amber-700">
-        <p class="text-xs text-amber-700 dark:text-amber-400 font-medium">
+        <!-- <p class="text-xs text-amber-700 dark:text-amber-400 font-medium">
             <i class="fa-regular fa-circle-exclamation mr-1"></i>Ces attributions ne sont pas encore enregistrées. Cliquez sur "Valider" pour confirmer.
-        </p>
+        </p> -->
     </div>
+    
     <div class="overflow-x-auto">
         <table class="w-full tbl">
             <thead>
