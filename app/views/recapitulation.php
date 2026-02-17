@@ -190,41 +190,89 @@ include __DIR__ . '/layout/header.php';
 
 <script>
 function actualiserStats() {
-    const btnRefresh = document.getElementById('btn-refresh');
-    const refreshIcon = document.getElementById('refresh-icon');
+    var btnRefresh = document.getElementById('btn-refresh');
+    var refreshIcon = document.getElementById('refresh-icon');
     btnRefresh.disabled = true;
     refreshIcon.classList.add('fa-spin');
-    
-    fetch('/api/recap')
-        .then(r => r.json())
-        .then(data => {
-            document.getElementById('stat-besoins-totaux').textContent = formatNumber(data.besoins_totaux.montant);
-            document.getElementById('stat-nb-besoins').textContent = data.besoins_totaux.nombre + ' besoins';
-            document.getElementById('stat-besoins-satisfaits').textContent = formatNumber(data.besoins_satisfaits.montant);
-            document.getElementById('stat-pourcentage').textContent = data.pourcentage_couverture + '%';
-            document.getElementById('stat-besoins-restants').textContent = formatNumber(data.besoins_restants.montant);
-            document.getElementById('stat-qte-restante').textContent = data.besoins_restants.quantite + ' unités';
-            document.getElementById('stat-argent-restant').textContent = formatNumber(data.dons.argent_restant);
-            document.getElementById('progress-percentage').textContent = data.pourcentage_couverture + '%';
-            document.getElementById('progress-bar').style.width = Math.min(data.pourcentage_couverture, 100) + '%';
-            document.getElementById('stat-via-dispatch').textContent = formatNumber(data.besoins_satisfaits.via_dispatch) + ' Ar';
-            document.getElementById('stat-dons-nature').textContent = data.dons.nature_materiel_qte + ' unités';
-            document.getElementById('stat-via-achats').textContent = formatNumber(data.besoins_satisfaits.via_achats) + ' Ar';
-            document.getElementById('stat-achats-total').textContent = formatNumber(data.achats.montant_total) + ' Ar';
-            document.getElementById('stat-achats-qte').textContent = data.achats.quantite + ' unités';
-            document.getElementById('last-update').innerHTML = '<i class="fa-regular fa-clock mr-1"></i> Dernière mise à jour : ' + data.timestamp;
-        })
-        .catch(err => {
-            console.error('Erreur:', err);
-            alert('Erreur lors de l\'actualisation');
-        })
-        .finally(() => {
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/api/recap', true);
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
             btnRefresh.disabled = false;
             refreshIcon.classList.remove('fa-spin');
-        });
+
+            if (xhr.status === 200) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+
+                    document.getElementById('stat-besoins-totaux').textContent = formatNumber(data.besoins_totaux.montant);
+                    document.getElementById('stat-nb-besoins').textContent = data.besoins_totaux.nombre + ' besoins';
+                    document.getElementById('stat-besoins-satisfaits').textContent = formatNumber(data.besoins_satisfaits.montant);
+                    document.getElementById('stat-pourcentage').textContent = data.pourcentage_couverture + '%';
+                    document.getElementById('stat-besoins-restants').textContent = formatNumber(data.besoins_restants.montant);
+                    document.getElementById('stat-qte-restante').textContent = data.besoins_restants.quantite + ' unités';
+                    document.getElementById('stat-argent-restant').textContent = formatNumber(data.dons.argent_restant);
+                    document.getElementById('progress-percentage').textContent = data.pourcentage_couverture + '%';
+                    document.getElementById('progress-bar').style.width = Math.min(data.pourcentage_couverture, 100) + '%';
+                    document.getElementById('stat-via-dispatch').textContent = formatNumber(data.besoins_satisfaits.via_dispatch) + ' Ar';
+                    document.getElementById('stat-dons-nature').textContent = data.dons.nature_materiel_qte + ' unités';
+                    document.getElementById('stat-via-achats').textContent = formatNumber(data.besoins_satisfaits.via_achats) + ' Ar';
+                    document.getElementById('stat-achats-total').textContent = formatNumber(data.achats.montant_total) + ' Ar';
+                    document.getElementById('stat-achats-qte').textContent = data.achats.quantite + ' unités';
+
+                    var ts = data.timestamp || new Date().toLocaleString('fr-FR');
+                    document.getElementById('last-update').innerHTML = '<i class="fa-regular fa-clock mr-1"></i>Dernière mise à jour : ' + ts;
+
+                    // Mise à jour du tableau par ville
+                    var tbody = document.getElementById('table-par-ville');
+                    if (data.par_ville && tbody) {
+                        var html = '';
+                        for (var i = 0; i < data.par_ville.length; i++) {
+                            var v = data.par_ville[i];
+                            var bt = parseFloat(v.besoins_totaux) || 0;
+                            var bs = parseFloat(v.besoins_satisfaits) || 0;
+                            var br = parseFloat(v.besoins_restants) || 0;
+                            var pct = bt > 0 ? Math.round((bs / bt) * 1000) / 10 : 0;
+                            var fillClass = pct >= 75 ? 'fill-green' : (pct >= 50 ? 'fill-amber' : 'fill-red');
+                            var textColor = pct >= 75 ? 'text-emerald-600' : (pct >= 50 ? 'text-amber-600' : 'text-red-500');
+                            html += '<tr>';
+                            html += '<td class="font-semibold text-gray-900 dark:text-white text-sm">' + escapeHtml(v.ville) + '</td>';
+                            html += '<td><span class="badge bg-blue-50 dark:bg-blue-500/10 text-brand-600 dark:text-brand-400">' + escapeHtml(v.region) + '</span></td>';
+                            html += '<td class="text-right text-gray-600 dark:text-gray-300 font-medium">' + formatNumber(bt) + ' Ar</td>';
+                            html += '<td class="text-right font-bold text-emerald-600">' + formatNumber(bs) + ' Ar</td>';
+                            html += '<td class="text-right font-bold text-red-500">' + formatNumber(br) + ' Ar</td>';
+                            html += '<td><div class="flex items-center space-x-3">';
+                            html += '<div class="flex-1 w-16 progress-bar"><div class="fill ' + fillClass + '" style="width:' + Math.min(pct, 100) + '%"></div></div>';
+                            html += '<span class="text-xs font-bold ' + textColor + ' w-9 text-right">' + pct + '%</span>';
+                            html += '</div></td>';
+                            html += '</tr>';
+                        }
+                        tbody.innerHTML = html;
+                    }
+
+                } catch (e) {
+                    alert('Erreur de lecture des données');
+                }
+            } else {
+                alert('Erreur serveur (code ' + xhr.status + ')');
+            }
+        }
+    };
+    xhr.send();
 }
+
 function formatNumber(num) {
+    if (num === null || num === undefined) return '0';
     return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 </script>
 

@@ -31,6 +31,34 @@ Désignation
 Quantité ou montant
 Date
 
+distribution des dons
+➜ dispatch.php
+validation de dons
+historique 
+total dispatch
+Quantité distribue
+montant total
+
+
+recapitualtion besoin et don : 
+➜ recapitualtion.php
+besoin totaux
+besoin satisfait 
+besoin restant
+dons argent 
+situation par ville 
+
+
+configuration de frais d achat
+➜ achat.
+historique des achats
+
+dons argent disponible 
+
+
+
+
+
 database
 table : 
     region
@@ -39,3 +67,5 @@ table :
     besoin donateur 
     dons
     dispatch
+    achat
+
