@@ -4,7 +4,7 @@ class DonModel
 {
     public static function create($donateurId, $typeBesoinId, $designation, $quantite, $montant)
     {
-        $db = Flight::db();
+        $db = Flight::db();//Récupère la connexion DB
         $sql = 'INSERT INTO dons (donateur_id, type_besoin_id, designation, quantite, montant)
                 VALUES (:donateur_id, :type_besoin_id, :designation, :quantite, :montant)';
         $stmt = $db->prepare($sql);
@@ -18,7 +18,7 @@ class DonModel
         return $db->lastInsertId();
     }
 
-    public static function getAllWithType()
+    public static function getAllWithType()   //Liste complète des dons
     {
         $db = Flight::db();
         $sql = 'SELECT d.id,
@@ -36,7 +36,7 @@ class DonModel
         return $stmt->fetchAll();
     }
 
-    public static function getNonDispatched()
+    public static function getNonDispatched() //Dons non encore totalement distribués
     {
         $db = Flight::db();
         $sql = 'SELECT d.id, d.type_besoin_id, d.designation, d.quantite, d.montant, d.date_don,
