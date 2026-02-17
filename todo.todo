@@ -59,7 +59,8 @@ les besoins totaux et satisfaits en montant et le montant des besoins restants.
 
 
 V3
-Il y a un donnee qui dit Voici les besoins et les dons
+Il y a un donnee qui dit Voici les besoins et les dons (a donner tout a leur)
+On demande donc :
 Simuler le dispatch et on cree un bouton qui renitialise tout ce qu'on a partage(On revient au donnee initiale)
 Mode 1:Par ordreVoici les besoins et les dons
 Mode 2:Ceux qui ont un minimum de besoin sont les premiers a servir
