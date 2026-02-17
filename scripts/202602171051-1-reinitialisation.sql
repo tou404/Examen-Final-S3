@@ -1,16 +1,34 @@
 -- =====================================
--- BASE DE DONNÉES : BNGRC
--- Projet final S3 – Février 2026
+-- SCRIPT DE REINITIALISATION (SANS DROP DATABASE)
 -- =====================================
 
-DROP DATABASE IF EXISTS db_s2_ETU003339;
-CREATE DATABASE db_s2_ETU003339;
 USE db_s2_ETU003339;
+
+-- 1. Désactiver les contraintes de clés étrangères
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 2. Supprimer les tables (ordre sécurisé)
+DROP TABLE IF EXISTS achats;
+DROP TABLE IF EXISTS dispatch;
+DROP TABLE IF EXISTS dons;
+DROP TABLE IF EXISTS besoin;
+DROP TABLE IF EXISTS villes;
+DROP TABLE IF EXISTS type_besoin;
+DROP TABLE IF EXISTS donateurs;
+DROP TABLE IF EXISTS config;
+DROP TABLE IF EXISTS region;
+
+-- 3. Réactiver les contraintes
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- =====================================
+-- RECREATION DES TABLES
+-- =====================================
 
 -- ======================
 -- 1. REGION
 -- ======================
-CREATE TABLE region (
+CREATE TABLE IF NOT EXISTS region (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) NOT NULL
 );
@@ -18,7 +36,7 @@ CREATE TABLE region (
 -- ======================
 -- 2. VILLES
 -- ======================
-CREATE TABLE villes (
+CREATE TABLE IF NOT EXISTS villes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
     region_id INT,
@@ -28,7 +46,7 @@ CREATE TABLE villes (
 -- ======================
 -- 3. TYPE DE BESOIN
 -- ======================
-CREATE TABLE type_besoin (
+CREATE TABLE IF NOT EXISTS type_besoin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     code VARCHAR(255) NOT NULL,
     libelle VARCHAR(255) NOT NULL
@@ -37,7 +55,7 @@ CREATE TABLE type_besoin (
 -- ======================
 -- 4. BESOINS
 -- ======================
-CREATE TABLE besoin (
+CREATE TABLE IF NOT EXISTS besoin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     type_besoin_id INT NOT NULL,
     ville_id INT NOT NULL,
@@ -53,7 +71,7 @@ CREATE TABLE besoin (
 -- ======================
 -- 5. DONATEURS
 -- ======================
-CREATE TABLE donateurs (
+CREATE TABLE IF NOT EXISTS donateurs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
     prenom VARCHAR(255) NOT NULL,
@@ -64,7 +82,7 @@ CREATE TABLE donateurs (
 -- ======================
 -- 6. DONS
 -- ======================
-CREATE TABLE dons (
+CREATE TABLE IF NOT EXISTS dons (
     id INT AUTO_INCREMENT PRIMARY KEY,
     donateur_id INT NOT NULL,
     type_besoin_id INT NOT NULL,
@@ -77,9 +95,9 @@ CREATE TABLE dons (
 );
 
 -- ======================
--- 7. DISPATCH (ATTRIBUTION DES DONS)
+-- 7. DISPATCH
 -- ======================
-CREATE TABLE dispatch (
+CREATE TABLE IF NOT EXISTS dispatch (
     id INT AUTO_INCREMENT PRIMARY KEY,
     don_id INT NOT NULL,
     besoin_id INT NOT NULL,
@@ -91,22 +109,18 @@ CREATE TABLE dispatch (
 );
 
 -- ======================
--- 8. CONFIGURATION (Frais d'achat, etc.)
+-- 8. CONFIG
 -- ======================
-CREATE TABLE config (
+CREATE TABLE IF NOT EXISTS config (
     cle VARCHAR(50) PRIMARY KEY,
     valeur VARCHAR(255) NOT NULL,
     description VARCHAR(255)
 );
 
--- Insertion du frais d'achat par défaut (10%)
-INSERT INTO config (cle, valeur, description) VALUES 
-('frais_achat', '10', 'Pourcentage de frais d''achat sur les achats via dons en argent');
-
 -- ======================
--- 9. ACHATS (Achats de besoins via dons en argent)
+-- 9. ACHATS
 -- ======================
-CREATE TABLE achats (
+CREATE TABLE IF NOT EXISTS achats (
     id INT AUTO_INCREMENT PRIMARY KEY,
     besoin_id INT NOT NULL,
     don_id INT NOT NULL,
@@ -120,3 +134,7 @@ CREATE TABLE achats (
     FOREIGN KEY (besoin_id) REFERENCES besoin(id),
     FOREIGN KEY (don_id) REFERENCES dons(id)
 );
+
+-- 10. Réinsertion de la config par défaut
+INSERT INTO config (cle, valeur, description)
+VALUES ('frais_achat', '10', 'Pourcentage de frais d''achat sur les achats via dons en argent');
