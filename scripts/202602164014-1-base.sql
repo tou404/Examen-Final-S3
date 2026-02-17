@@ -89,3 +89,34 @@ CREATE TABLE dispatch (
     FOREIGN KEY (don_id) REFERENCES dons(id),
     FOREIGN KEY (besoin_id) REFERENCES besoin(id)
 );
+
+-- ======================
+-- 8. CONFIGURATION (Frais d'achat, etc.)
+-- ======================
+CREATE TABLE config (
+    cle VARCHAR(50) PRIMARY KEY,
+    valeur VARCHAR(255) NOT NULL,
+    description VARCHAR(255)
+);
+
+-- Insertion du frais d'achat par défaut (10%)
+INSERT INTO config (cle, valeur, description) VALUES 
+('frais_achat', '10', 'Pourcentage de frais d''achat sur les achats via dons en argent');
+
+-- ======================
+-- 9. ACHATS (Achats de besoins via dons en argent)
+-- ======================
+CREATE TABLE achats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    besoin_id INT NOT NULL,
+    don_id INT NOT NULL,
+    quantite_achetee INT NOT NULL,
+    prix_unitaire DECIMAL(10,2) NOT NULL,
+    montant_ht DECIMAL(10,2) NOT NULL,
+    frais_pourcentage DECIMAL(5,2) NOT NULL,
+    montant_frais DECIMAL(10,2) NOT NULL,
+    montant_total DECIMAL(10,2) NOT NULL,
+    date_achat DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (besoin_id) REFERENCES besoin(id),
+    FOREIGN KEY (don_id) REFERENCES dons(id)
+);

@@ -42,4 +42,31 @@ class DonController
 
         Flight::redirect('/don');
     }
+
+    public static function update()
+    {
+        $data = Flight::request()->data;
+
+        $id           = (int) $data->id;
+        $typeBesoinId = (int) $data->type_besoin_id;
+        $designation  = trim($data->designation ?? '');
+        $quantite     = (int) ($data->quantite ?? 0);
+        $montant      = (float) ($data->montant ?? 0);
+
+        // Le donateur_id reste inchangé pour simplifier
+        $don = DonModel::getById($id);
+        if ($don && $id && $typeBesoinId && ($quantite > 0 || $montant > 0)) {
+            DonModel::update($id, $don['donateur_id'], $typeBesoinId, $designation, $quantite, $montant);
+        }
+
+        Flight::redirect('/don');
+    }
+
+    public static function delete($id)
+    {
+        if ($id) {
+            DonModel::delete((int) $id);
+        }
+        Flight::redirect('/don');
+    }
 }
