@@ -95,8 +95,8 @@
 
         /* Cards */
         .card {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
             overflow: hidden;
             transition: box-shadow 0.3s ease, transform 0.3s ease;
@@ -114,8 +114,8 @@
 
         /* Stat cards */
         .stat-card {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
             padding: 20px 24px;
             transition: all 0.3s ease;
@@ -153,19 +153,19 @@
         }
         .tbl tbody tr {
             transition: background 0.2s ease;
-            border-bottom: 1px solid #f3f4f6;
+            border-bottom: 1px solid #e8ecf1;
         }
         .dark .tbl tbody tr {
             border-bottom-color: #1e293b;
         }
         .tbl tbody tr:nth-child(even) {
-            background: #f9fafb;
+            background: #f1f5f9;
         }
         .dark .tbl tbody tr:nth-child(even) {
             background: rgba(30, 41, 59, 0.5);
         }
         .tbl tbody tr:hover {
-            background: #eff6ff;
+            background: #e0ecfa;
         }
         .dark .tbl tbody tr:hover {
             background: rgba(59, 130, 246, 0.06);
@@ -236,12 +236,12 @@
 
         /* Inputs */
         .input {
-            border: 1.5px solid #d1d5db;
+            border: 1.5px solid #cbd5e1;
             border-radius: 8px;
             padding: 10px 14px;
             font-size: 0.8125rem;
             transition: all 0.2s ease;
-            background: #ffffff;
+            background: #f8fafc;
             color: #111827;
         }
         .dark .input {
@@ -330,7 +330,7 @@
             width: 56px;
             height: 56px;
             border-radius: 12px;
-            background: #f3f4f6;
+            background: #e8ecf1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -428,7 +428,7 @@
         initTheme();
     </script>
 </head>
-<body class="bg-[#f3f4f6] dark:bg-[#0f172a] min-h-screen antialiased text-gray-700 dark:text-gray-300 transition-colors duration-200">
+<body class="bg-[#eef2f7] dark:bg-[#0f172a] min-h-screen antialiased text-gray-700 dark:text-gray-300 transition-colors duration-200">
 
     <div class="flex min-h-screen">
 
@@ -491,7 +491,7 @@
         <main class="flex-1 flex flex-col min-w-0 ml-60">
 
             <!-- Top bar -->
-            <header class="h-16 bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-gray-700/50 px-6 flex items-center justify-between sticky top-0 z-40 no-print">
+            <header class="h-16 bg-[#f0f4f8] dark:bg-[#1e293b] border-b border-[#dce3eb] dark:border-gray-700/50 px-6 flex items-center justify-between sticky top-0 z-40 no-print">
                 <div>
                     <h2 class="text-lg font-bold text-gray-900 dark:text-white"><?= htmlspecialchars($page_title) ?></h2>
                     <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Bureau National de Gestion des Risques et Catastrophes</p>

@@ -37,7 +37,6 @@ Repartition des taches:
 
 
 Fonctionnement
-V1
     On saisie les besoins des sinistrés par ville (on n'identifie pas personnellement un sinistré). On saisie les dons On simule le dispatch des dons par ordre de date et de saisie
 
     Objectifs
@@ -46,22 +45,3 @@ V1
     Règle de gestion
     Chaque besoin possède un prix unitaire et un quantité. On suppose que le prix unitaire ne change jamais.
 
-
-V2
-On peut acheter via les dons en argent les besoins en nature et en matériaux selon les prix unitaires
-dits ci-dessus (saisie et liste des achats filtrables par ville à faire). Il y a un frais d'achat de x%
-configurable. (ex: achat de 100 avec 10%, donc achat de 110). On utilise la page des besoins restants
-pour faire les achats. Il y a un message d'erreur si l'achat existe encore dans les dons restants.
-Page de simulation : il y a un bouton simuler qui permet de voir le résulat et un bouton validation qui
-dispatch vraiment les dons
-Créer une page de récapitulation (avec un bouton actualiser en Ajax) qui affiche :
-les besoins totaux et satisfaits en montant et le montant des besoins restants.
-
-
-V3
-Il y a un donnee qui dit Voici les besoins et les dons (a donner tout a leur)
-On demande donc :
-Simuler le dispatch et on cree un bouton qui renitialise tout ce qu'on a partage(On revient au donnee initiale)
-Mode 1:Par ordreVoici les besoins et les dons
-Mode 2:Ceux qui ont un minimum de besoin sont les premiers a servir
-Mode 3:Proportionnel au demande
