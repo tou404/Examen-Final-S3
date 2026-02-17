@@ -31,7 +31,7 @@ Livraison
 
 
 Repartition des taches:
--Marouane: creation de base de donnee mysql 10 min
+-Mamy: creation de base de donnee mysql 10 min
 -Toavina: initialisation du dossier "config" de notre base de donnee: database.php,config.php,routes.php,index.php 10 min
 -Itokiana: Creations des fichiers model 10 min
 
@@ -44,4 +44,5 @@ Fonctionnement
 
     Règle de gestion
     Chaque besoin possède un prix unitaire et un quantité. On suppose que le prix unitaire ne change jamais.
+
 
